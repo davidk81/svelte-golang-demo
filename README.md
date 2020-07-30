@@ -22,6 +22,8 @@ internationalization possibiles will not be address; if needed, it should be pos
 
 for the sake of keeping this demo simple during developemnt, a single goLang backend service is used to authenticate and serve all api requests. the backend will be used to authenticate client session by providing JWT tokens; it should also be easy to use a 3rd party authentication provider instead. 
 
+if/when the need arises to separate the backend into individual microserves, the api structure is designed to make this process relatively simple. some code refactoring may need to be done, for example, the client JWT token validation may be refactored to make a
+
 data is persisted by backend using sql interface. any popular sql backend such my mysql or postgres may be used.
 
 #### services & data modelling
