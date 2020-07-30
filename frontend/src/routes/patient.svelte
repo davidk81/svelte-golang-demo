@@ -1,8 +1,10 @@
 <script>
   import { onMount } from 'svelte';
+  import { stores } from '@sapper/app'
   import HealthNoteView from '../components/HealthNoteView.svelte';
   import HealthNoteEdit from '../components/HealthNoteEdit.svelte';
-
+  
+  const { session } = stores()
   let patient
   let healthNotes;
 
@@ -32,14 +34,16 @@
 </script>
 
 <h1>Patient</h1>
-{#if patient}
-  <div>
-  {patient.name} ({patient.patientId})
-  </div>
-  {#if healthNotes}
-    {#each healthNotes.records as healthNote}
-      <HealthNoteView healthNote={healthNote}/>
-    {/each}
+{#if $session && $session.authenticated}
+  {#if patient}
+    <div>
+    {patient.name} ({patient.patientId})
+    </div>
+    {#if healthNotes}
+      {#each healthNotes.records as healthNote}
+        <HealthNoteView healthNote={healthNote}/>
+      {/each}
+    {/if}
+    <HealthNoteEdit/>
   {/if}
-  <HealthNoteEdit/>
 {/if}

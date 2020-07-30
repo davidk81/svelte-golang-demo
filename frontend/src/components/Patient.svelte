@@ -1,8 +1,10 @@
 <script>
+  import { goto, stores } from '@sapper/app'
+
   export let patient
 
   function onClick() {
-		window.location.href= 'patient?patientId=' + patient.patientId
+		goto('patient?patientId=' + patient.patientId)
 	}
 </script>
 

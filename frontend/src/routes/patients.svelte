@@ -1,7 +1,9 @@
 <script>
   import { onMount } from 'svelte';
+  import { stores } from '@sapper/app'
   import Patient from '../components/Patient.svelte';
 
+  const { session } = stores()
   let patients
 
 	onMount(async () => {
@@ -18,8 +20,10 @@
 </script>
 
 <h1>Patients</h1>
-{#if patients}
-  {#each patients as patient}
-    <Patient patient={patient}/>
-  {/each}
+{#if $session && $session.authenticated}
+  {#if patients}
+    {#each patients as patient}
+      <Patient patient={patient}/>
+    {/each}
+  {/if}
 {/if}

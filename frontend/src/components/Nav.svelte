@@ -1,4 +1,7 @@
 <script>
+  	import { stores } from '@sapper/app'
+  
+  	const { session } = stores()
 	export let segment;
 </script>
 
@@ -53,18 +56,22 @@
 <nav>
 	<ul>
 		<li><a aria-current="{segment === undefined ? 'page' : undefined}" href=".">home</a></li>
-    <li><a aria-current='{segment === "patients" ? "page" : undefined}' href='patients'>patients</a></li>
-    {#if segment === "patient"}
-    <li><a aria-current='{segment === "patient" ? "page" : undefined}' href='patient'>patient</a></li>
-    {/if}
+		{#if $session && $session.authenticated}
+			{#if $session.profile.roles.includes('nurse')}
+				<li><a aria-current='{segment === "patients" ? "page" : undefined}' href='patients'>patients</a></li>
+				{#if segment === "patient"}
+					<li><a aria-current='{segment === "patient" ? "page" : undefined}' href='patient'>patient</a></li>
+				{/if}
+			{/if}
+		{/if}
   </ul>
   <ul>
-    <li><a aria-current='{segment === "admin" ? "page" : undefined}' href='admin'>admin</a></li>
-    <li><a aria-current='{segment === "profile" ? "page" : undefined}' href='profile'>profile</a></li>
-	</ul>
+	{#if $session && $session.authenticated}
+		{#if $session.profile.roles.includes('admin')}
+			<li><a aria-current='{segment === "admin" ? "page" : undefined}' href='admin'>admin</a></li>
+		{/if}
+		<li><a aria-current='{segment === "profile" ? "page" : undefined}' href='profile'>profile</a></li>
+		<li><a href='logout'>log out</a></li>
+    {/if}
+</ul>
 </nav>
-
-<!-- hack for generating non-crawlable static pages, hidden to user but visible for sapper export crawling -->
-<div hidden=true>
-  <a href='patient'>.</a>
-</div>

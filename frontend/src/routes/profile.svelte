@@ -1,6 +1,8 @@
 <script>
   import { onMount } from 'svelte';
+  import { stores } from '@sapper/app'
 
+  const { session } = stores()
   let profile
   
   onMount(async () => {
@@ -17,17 +19,19 @@
 </script>
 
 <h1>Profile</h1>
-{#if profile}
-<h2>Name</h2>
-<ul>{profile.name}</ul>
+{#if $session && $session.authenticated}
+  {#if profile}
+  <h2>Name</h2>
+  <ul>{profile.name}</ul>
 
-<h2>Login ID</h2>
-<ul>{profile.username}</ul>
+  <h2>Login ID</h2>
+  <ul>{profile.username}</ul>
 
-<h2>Roles</h2>
-<ul>
-  {#each profile.roles as role}
-  <li>{role}</li>
-  {/each}
-</ul>
+  <h2>Roles</h2>
+  <ul>
+    {#each profile.roles as role}
+    <li>{role}</li>
+    {/each}
+  </ul>
+  {/if}
 {/if}

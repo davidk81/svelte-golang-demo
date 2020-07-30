@@ -1,45 +1,55 @@
-<style>
-	h1, figure, p {
-		text-align: center;
-		margin: 0 auto;
-	}
+<script>
+  import { goto, stores } from '@sapper/app'
+  
+  const { session } = stores()
+  let username = null
+  let password = 'password'
 
-	h1 {
-		font-size: 2.8em;
-		text-transform: uppercase;
-		font-weight: 700;
-		margin: 0 0 0.5em 0;
-	}
-
-	figure {
-		margin: 0 0 1em 0;
-	}
-
-	img {
-		width: 100%;
-		max-width: 400px;
-		margin: 0 0 1em 0;
-	}
-
-	p {
-		margin: 1em auto;
-	}
-
-	@media (min-width: 480px) {
-		h1 {
-			font-size: 4em;
-		}
-	}
-</style>
+  async function login () {
+    const response = await fetch('http://localhost:8000/session', {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        password
+      })
+    })
+    if (response.ok) {
+      const profile = await response.json();
+      session.update(() => {
+                    return {
+                        authenticated: !!profile,
+                        profile
+                    }
+                });
+    } else {
+      session.update(() => {
+                    return {
+                        authenticated: false,
+                        profile : null
+                    }
+                });
+      console.log(response);
+    }
+    goto('patients')
+  }
+</script>
 
 <svelte:head>
-	<title>Sapper project template</title>
+	<title>Patient Management System</title>
 </svelte:head>
 
-<h1>Great success!</h1>
-
-<figure>
-	<figcaption>Have fun with Sapper!</figcaption>
-</figure>
-
-<p><strong>Try editing this file (src/routes/index.svelte) to test live reloading.</strong></p>
+{#if $session && $session.authenticated}
+  <p>Welcome, {$session.profile.name}</p>
+{:else}
+  <form>
+  <p>Nurse Login</p>
+  <input type="txt" bind:value={username} />
+  <input type="password" bind:value={password} />
+  <button type="button" disabled={!username} on:click={login}>login</button>
+  </form>
+{/if}
