@@ -7,6 +7,8 @@
 		border-bottom: 1px solid rgba(255,62,0,0.1);
 		font-weight: 300;
 		padding: 0 1em;
+    display: flex;
+    justify-content: space-between;
 	}
 
 	ul {
@@ -51,10 +53,18 @@
 <nav>
 	<ul>
 		<li><a aria-current="{segment === undefined ? 'page' : undefined}" href=".">home</a></li>
-		<li><a aria-current="{segment === 'about' ? 'page' : undefined}" href="about">about</a></li>
-
-		<!-- for the blog link, we're using rel=prefetch so that Sapper prefetches
-		     the blog data when we hover over the link or tap it on a touchscreen -->
-		<li><a rel=prefetch aria-current="{segment === 'blog' ? 'page' : undefined}" href="blog">blog</a></li>
+    <li><a aria-current='{segment === "patients" ? "page" : undefined}' href='patients'>patients</a></li>
+    {#if segment === "patient"}
+    <li><a aria-current='{segment === "patient" ? "page" : undefined}' href='patient'>patient</a></li>
+    {/if}
+  </ul>
+  <ul>
+    <li><a aria-current='{segment === "admin" ? "page" : undefined}' href='admin'>admin</a></li>
+    <li><a aria-current='{segment === "profile" ? "page" : undefined}' href='profile'>profile</a></li>
 	</ul>
 </nav>
+
+<!-- hack for generating non-crawlable static pages, hidden to user but visible for sapper export crawling -->
+<div hidden=true>
+  <a href='patient'>.</a>
+</div>

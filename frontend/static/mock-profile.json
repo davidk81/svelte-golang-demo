@@ -1,0 +1,5 @@
+{
+  "name": "Administrator",
+  "username": "admin",
+  "roles": ["admin", "nurse"]
+}
