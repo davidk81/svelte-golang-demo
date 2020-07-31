@@ -6,7 +6,7 @@
 
 	onMount(async () => {
     session.set({ authenticated: false, profile: null })
-    await fetch('http://localhost:8000/session', {
+    await fetch('http://localhost:8000/api/v1/session', {
       method: 'DELETE',
       mode: 'cors',
       credentials: 'include',

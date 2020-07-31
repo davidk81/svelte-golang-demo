@@ -7,7 +7,7 @@
   let patients
 
 	onMount(async () => {
-    const response = await fetch('mock-patients.json', {
+    const response = await fetch('http://localhost:8000/api/v1/patients', {
       method: 'GET',
       mode: 'cors',
       credentials: 'include',

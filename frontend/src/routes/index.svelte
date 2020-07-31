@@ -4,9 +4,11 @@
   const { session } = stores()
   let username = null
   let password = 'password'
+  let error = false
 
   async function login () {
-    const response = await fetch('http://localhost:8000/session', {
+    console.log('login')
+    const response = await fetch('http://localhost:8000/api/v1/session', {
       method: 'POST',
       mode: 'cors',
       credentials: 'include',
@@ -26,6 +28,8 @@
                         profile
                     }
                 });
+      error = !!profile
+      goto('patients')
     } else {
       session.update(() => {
                     return {
@@ -34,8 +38,8 @@
                     }
                 });
       console.log(response);
+      error = true;
     }
-    goto('patients')
   }
 </script>
 
@@ -48,8 +52,10 @@
 {:else}
   <form>
   <p>Nurse Login</p>
-  <input type="txt" bind:value={username} />
-  <input type="password" bind:value={password} />
+  {#if error}
+  <div>login error!</div>
+  {/if}
+  <input bind:value={username}/>
   <button type="button" disabled={!username} on:click={login}>login</button>
   </form>
 {/if}

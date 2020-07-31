@@ -16,6 +16,8 @@ A demo app using Svelte as frontend and GoLang as backend. This app provides an 
 
 Svelte will be used to compile frontend into static html/css/js pages that can be served over HTTP(S). JWT is used to authenticate client (web browser), as well as validate client session using stateless servers. HTTPS should be employed when deployed in production environment.
 
+One advantage of using svelte is its extremely small and fast compiled size. site built with svelt can fun very fast and require little resources, this can be advantageous especially in context of mobile devices. browser compatibility of the target mobile device should be investigated.
+
 internationalization possibiles will not be address; if needed, it should be possible to achieve localization using plugins such as [svelte-i18n](https://github.com/kaisermann/svelte-i18n).
 
 #### backend
