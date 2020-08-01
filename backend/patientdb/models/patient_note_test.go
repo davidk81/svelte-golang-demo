@@ -503,7 +503,7 @@ func testPatientNoteToOnePatientUsingPatientid(t *testing.T) {
 	var foreign Patient
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, patientNoteDBTypes, true, patientNoteColumnsWithDefault...); err != nil {
+	if err := randomize.Struct(seed, &local, patientNoteDBTypes, false, patientNoteColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize PatientNote struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, patientDBTypes, false, patientColumnsWithDefault...); err != nil {
@@ -514,7 +514,7 @@ func testPatientNoteToOnePatientUsingPatientid(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&local.Patient_Id, foreign.Patientid)
+	local.Patient_Id = foreign.Patientid
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -524,7 +524,7 @@ func testPatientNoteToOnePatientUsingPatientid(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !queries.Equal(check.Patientid, foreign.Patientid) {
+	if check.Patientid != foreign.Patientid {
 		t.Errorf("want: %v, got %v", foreign.Patientid, check.Patientid)
 	}
 
@@ -554,7 +554,7 @@ func testPatientNoteToOneUserUsingUserid(t *testing.T) {
 	var foreign User
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, patientNoteDBTypes, true, patientNoteColumnsWithDefault...); err != nil {
+	if err := randomize.Struct(seed, &local, patientNoteDBTypes, false, patientNoteColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize PatientNote struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, userDBTypes, false, userColumnsWithDefault...); err != nil {
@@ -565,7 +565,7 @@ func testPatientNoteToOneUserUsingUserid(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&local.User_Id, foreign.Userid)
+	local.User_Id = foreign.Userid
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -575,7 +575,7 @@ func testPatientNoteToOneUserUsingUserid(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !queries.Equal(check.Userid, foreign.Userid) {
+	if check.Userid != foreign.Userid {
 		t.Errorf("want: %v, got %v", foreign.Userid, check.Userid)
 	}
 
@@ -637,7 +637,7 @@ func testPatientNoteToOneSetOpPatientUsingPatientid(t *testing.T) {
 		if x.R.PatientidPatientNotes[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if !queries.Equal(a.Patient_Id, x.Patientid) {
+		if a.Patient_Id != x.Patientid {
 			t.Error("foreign key was wrong value", a.Patient_Id)
 		}
 
@@ -648,63 +648,11 @@ func testPatientNoteToOneSetOpPatientUsingPatientid(t *testing.T) {
 			t.Fatal("failed to reload", err)
 		}
 
-		if !queries.Equal(a.Patient_Id, x.Patientid) {
+		if a.Patient_Id != x.Patientid {
 			t.Error("foreign key was wrong value", a.Patient_Id, x.Patientid)
 		}
 	}
 }
-
-func testPatientNoteToOneRemoveOpPatientUsingPatientid(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a PatientNote
-	var b Patient
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, patientNoteDBTypes, false, strmangle.SetComplement(patientNotePrimaryKeyColumns, patientNoteColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, patientDBTypes, false, strmangle.SetComplement(patientPrimaryKeyColumns, patientColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetPatientid(ctx, tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemovePatientid(ctx, tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.Patientid().Count(ctx, tx)
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.Patientid != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if !queries.IsValuerNil(a.Patient_Id) {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.PatientidPatientNotes) != 0 {
-		t.Error("failed to remove a from b's relationships")
-	}
-}
-
 func testPatientNoteToOneSetOpUserUsingUserid(t *testing.T) {
 	var err error
 
@@ -746,7 +694,7 @@ func testPatientNoteToOneSetOpUserUsingUserid(t *testing.T) {
 		if x.R.UseridPatientNotes[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if !queries.Equal(a.User_Id, x.Userid) {
+		if a.User_Id != x.Userid {
 			t.Error("foreign key was wrong value", a.User_Id)
 		}
 
@@ -757,60 +705,9 @@ func testPatientNoteToOneSetOpUserUsingUserid(t *testing.T) {
 			t.Fatal("failed to reload", err)
 		}
 
-		if !queries.Equal(a.User_Id, x.Userid) {
+		if a.User_Id != x.Userid {
 			t.Error("foreign key was wrong value", a.User_Id, x.Userid)
 		}
-	}
-}
-
-func testPatientNoteToOneRemoveOpUserUsingUserid(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a PatientNote
-	var b User
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, patientNoteDBTypes, false, strmangle.SetComplement(patientNotePrimaryKeyColumns, patientNoteColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetUserid(ctx, tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemoveUserid(ctx, tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.Userid().Count(ctx, tx)
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.Userid != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if !queries.IsValuerNil(a.User_Id) {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.UseridPatientNotes) != 0 {
-		t.Error("failed to remove a from b's relationships")
 	}
 }
 

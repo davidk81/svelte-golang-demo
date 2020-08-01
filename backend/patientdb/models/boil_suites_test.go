@@ -126,10 +126,7 @@ func TestToOneSet(t *testing.T) {
 
 // TestToOneRemove tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToOneRemove(t *testing.T) {
-	t.Run("PatientNoteToPatientUsingPatientidPatientNotes", testPatientNoteToOneRemoveOpPatientUsingPatientid)
-	t.Run("PatientNoteToUserUsingUseridPatientNotes", testPatientNoteToOneRemoveOpUserUsingUserid)
-}
+func TestToOneRemove(t *testing.T) {}
 
 // TestOneToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
@@ -148,17 +145,11 @@ func TestToManyAdd(t *testing.T) {
 
 // TestToManySet tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToManySet(t *testing.T) {
-	t.Run("PatientToPatientidPatientNotes", testPatientToManySetOpPatientidPatientNotes)
-	t.Run("UserToUseridPatientNotes", testUserToManySetOpUseridPatientNotes)
-}
+func TestToManySet(t *testing.T) {}
 
 // TestToManyRemove tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToManyRemove(t *testing.T) {
-	t.Run("PatientToPatientidPatientNotes", testPatientToManyRemoveOpPatientidPatientNotes)
-	t.Run("UserToUseridPatientNotes", testUserToManyRemoveOpUseridPatientNotes)
-}
+func TestToManyRemove(t *testing.T) {}
 
 func TestReload(t *testing.T) {
 	t.Run("Patients", testPatientsReload)

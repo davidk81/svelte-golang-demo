@@ -519,8 +519,9 @@ func testPatientToManyPatientidPatientNotes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.Patient_Id, a.Patientid)
-	queries.Assign(&c.Patient_Id, a.Patientid)
+	b.Patient_Id = a.Patientid
+	c.Patient_Id = a.Patientid
+
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -535,10 +536,10 @@ func testPatientToManyPatientidPatientNotes(t *testing.T) {
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if queries.Equal(v.Patient_Id, b.Patient_Id) {
+		if v.Patient_Id == b.Patient_Id {
 			bFound = true
 		}
-		if queries.Equal(v.Patient_Id, c.Patient_Id) {
+		if v.Patient_Id == c.Patient_Id {
 			cFound = true
 		}
 	}
@@ -616,10 +617,10 @@ func testPatientToManyAddOpPatientidPatientNotes(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.Patientid, first.Patient_Id) {
+		if a.Patientid != first.Patient_Id {
 			t.Error("foreign key was wrong value", a.Patientid, first.Patient_Id)
 		}
-		if !queries.Equal(a.Patientid, second.Patient_Id) {
+		if a.Patientid != second.Patient_Id {
 			t.Error("foreign key was wrong value", a.Patientid, second.Patient_Id)
 		}
 
@@ -644,181 +645,6 @@ func testPatientToManyAddOpPatientidPatientNotes(t *testing.T) {
 		if want := int64((i + 1) * 2); count != want {
 			t.Error("want", want, "got", count)
 		}
-	}
-}
-
-func testPatientToManySetOpPatientidPatientNotes(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Patient
-	var b, c, d, e PatientNote
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, patientDBTypes, false, strmangle.SetComplement(patientPrimaryKeyColumns, patientColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*PatientNote{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, patientNoteDBTypes, false, strmangle.SetComplement(patientNotePrimaryKeyColumns, patientNoteColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.SetPatientidPatientNotes(ctx, tx, false, &b, &c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.PatientidPatientNotes().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetPatientidPatientNotes(ctx, tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.PatientidPatientNotes().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.Patient_Id) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.Patient_Id) {
-		t.Error("want c's foreign key value to be nil")
-	}
-	if !queries.Equal(a.Patientid, d.Patient_Id) {
-		t.Error("foreign key was wrong value", a.Patientid, d.Patient_Id)
-	}
-	if !queries.Equal(a.Patientid, e.Patient_Id) {
-		t.Error("foreign key was wrong value", a.Patientid, e.Patient_Id)
-	}
-
-	if b.R.Patientid != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.Patientid != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.Patientid != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.Patientid != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-
-	if a.R.PatientidPatientNotes[0] != &d {
-		t.Error("relationship struct slice not set to correct value")
-	}
-	if a.R.PatientidPatientNotes[1] != &e {
-		t.Error("relationship struct slice not set to correct value")
-	}
-}
-
-func testPatientToManyRemoveOpPatientidPatientNotes(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Patient
-	var b, c, d, e PatientNote
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, patientDBTypes, false, strmangle.SetComplement(patientPrimaryKeyColumns, patientColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*PatientNote{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, patientNoteDBTypes, false, strmangle.SetComplement(patientNotePrimaryKeyColumns, patientNoteColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.AddPatientidPatientNotes(ctx, tx, true, foreigners...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.PatientidPatientNotes().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 4 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.RemovePatientidPatientNotes(ctx, tx, foreigners[:2]...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.PatientidPatientNotes().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.Patient_Id) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.Patient_Id) {
-		t.Error("want c's foreign key value to be nil")
-	}
-
-	if b.R.Patientid != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.Patientid != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.Patientid != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-	if e.R.Patientid != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-
-	if len(a.R.PatientidPatientNotes) != 2 {
-		t.Error("should have preserved two relationships")
-	}
-
-	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.PatientidPatientNotes[1] != &d {
-		t.Error("relationship to d should have been preserved")
-	}
-	if a.R.PatientidPatientNotes[0] != &e {
-		t.Error("relationship to e should have been preserved")
 	}
 }
 

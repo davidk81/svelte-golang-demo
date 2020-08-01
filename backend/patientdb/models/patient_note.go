@@ -24,11 +24,11 @@ import (
 
 // PatientNote is an object representing the database table.
 type PatientNote struct {
-	Noteid     string      `boil:"noteid" json:"noteid" toml:"noteid" yaml:"noteid"`
-	Patient_Id null.String `boil:"patientid" json:"patientid,omitempty" toml:"patientid" yaml:"patientid,omitempty"`
-	User_Id    null.String `boil:"userid" json:"userid,omitempty" toml:"userid" yaml:"userid,omitempty"`
-	Note       null.String `boil:"note" json:"note,omitempty" toml:"note" yaml:"note,omitempty"`
-	Created    null.Time   `boil:"created" json:"created,omitempty" toml:"created" yaml:"created,omitempty"`
+	Noteid     string    `boil:"noteid" json:"noteid" toml:"noteid" yaml:"noteid"`
+	Patient_Id string    `boil:"patientid" json:"patientid" toml:"patientid" yaml:"patientid"`
+	User_Id    string    `boil:"userid" json:"userid" toml:"userid" yaml:"userid"`
+	Note       string    `boil:"note" json:"note" toml:"note" yaml:"note"`
+	Created    null.Time `boil:"created" json:"created,omitempty" toml:"created" yaml:"created,omitempty"`
 
 	R *patientNoteR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L patientNoteL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -52,15 +52,15 @@ var PatientNoteColumns = struct {
 
 var PatientNoteWhere = struct {
 	Noteid     whereHelperstring
-	Patient_Id whereHelpernull_String
-	User_Id    whereHelpernull_String
-	Note       whereHelpernull_String
+	Patient_Id whereHelperstring
+	User_Id    whereHelperstring
+	Note       whereHelperstring
 	Created    whereHelpernull_Time
 }{
 	Noteid:     whereHelperstring{field: "\"patient_note\".\"noteid\""},
-	Patient_Id: whereHelpernull_String{field: "\"patient_note\".\"patientid\""},
-	User_Id:    whereHelpernull_String{field: "\"patient_note\".\"userid\""},
-	Note:       whereHelpernull_String{field: "\"patient_note\".\"note\""},
+	Patient_Id: whereHelperstring{field: "\"patient_note\".\"patientid\""},
+	User_Id:    whereHelperstring{field: "\"patient_note\".\"userid\""},
+	Note:       whereHelperstring{field: "\"patient_note\".\"note\""},
 	Created:    whereHelpernull_Time{field: "\"patient_note\".\"created\""},
 }
 
@@ -414,9 +414,7 @@ func (patientNoteL) LoadPatientid(ctx context.Context, e boil.ContextExecutor, s
 		if object.R == nil {
 			object.R = &patientNoteR{}
 		}
-		if !queries.IsNil(object.Patient_Id) {
-			args = append(args, object.Patient_Id)
-		}
+		args = append(args, object.Patient_Id)
 
 	} else {
 	Outer:
@@ -426,14 +424,12 @@ func (patientNoteL) LoadPatientid(ctx context.Context, e boil.ContextExecutor, s
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.Patient_Id) {
+				if a == obj.Patient_Id {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.Patient_Id) {
-				args = append(args, obj.Patient_Id)
-			}
+			args = append(args, obj.Patient_Id)
 
 		}
 	}
@@ -488,7 +484,7 @@ func (patientNoteL) LoadPatientid(ctx context.Context, e boil.ContextExecutor, s
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.Patient_Id, foreign.Patientid) {
+			if local.Patient_Id == foreign.Patientid {
 				local.R.Patientid = foreign
 				if foreign.R == nil {
 					foreign.R = &patientR{}
@@ -519,9 +515,7 @@ func (patientNoteL) LoadUserid(ctx context.Context, e boil.ContextExecutor, sing
 		if object.R == nil {
 			object.R = &patientNoteR{}
 		}
-		if !queries.IsNil(object.User_Id) {
-			args = append(args, object.User_Id)
-		}
+		args = append(args, object.User_Id)
 
 	} else {
 	Outer:
@@ -531,14 +525,12 @@ func (patientNoteL) LoadUserid(ctx context.Context, e boil.ContextExecutor, sing
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.User_Id) {
+				if a == obj.User_Id {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.User_Id) {
-				args = append(args, obj.User_Id)
-			}
+			args = append(args, obj.User_Id)
 
 		}
 	}
@@ -593,7 +585,7 @@ func (patientNoteL) LoadUserid(ctx context.Context, e boil.ContextExecutor, sing
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.User_Id, foreign.Userid) {
+			if local.User_Id == foreign.Userid {
 				local.R.Userid = foreign
 				if foreign.R == nil {
 					foreign.R = &userR{}
@@ -634,7 +626,7 @@ func (o *PatientNote) SetPatientid(ctx context.Context, exec boil.ContextExecuto
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.Patient_Id, related.Patientid)
+	o.Patient_Id = related.Patientid
 	if o.R == nil {
 		o.R = &patientNoteR{
 			Patientid: related,
@@ -651,39 +643,6 @@ func (o *PatientNote) SetPatientid(ctx context.Context, exec boil.ContextExecuto
 		related.R.PatientidPatientNotes = append(related.R.PatientidPatientNotes, o)
 	}
 
-	return nil
-}
-
-// RemovePatientid relationship.
-// Sets o.R.Patientid to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-func (o *PatientNote) RemovePatientid(ctx context.Context, exec boil.ContextExecutor, related *Patient) error {
-	var err error
-
-	queries.SetScanner(&o.Patient_Id, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("patientid")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.Patientid = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.PatientidPatientNotes {
-		if queries.Equal(o.Patient_Id, ri.Patient_Id) {
-			continue
-		}
-
-		ln := len(related.R.PatientidPatientNotes)
-		if ln > 1 && i < ln-1 {
-			related.R.PatientidPatientNotes[i] = related.R.PatientidPatientNotes[ln-1]
-		}
-		related.R.PatientidPatientNotes = related.R.PatientidPatientNotes[:ln-1]
-		break
-	}
 	return nil
 }
 
@@ -714,7 +673,7 @@ func (o *PatientNote) SetUserid(ctx context.Context, exec boil.ContextExecutor, 
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.User_Id, related.Userid)
+	o.User_Id = related.Userid
 	if o.R == nil {
 		o.R = &patientNoteR{
 			Userid: related,
@@ -731,39 +690,6 @@ func (o *PatientNote) SetUserid(ctx context.Context, exec boil.ContextExecutor, 
 		related.R.UseridPatientNotes = append(related.R.UseridPatientNotes, o)
 	}
 
-	return nil
-}
-
-// RemoveUserid relationship.
-// Sets o.R.Userid to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-func (o *PatientNote) RemoveUserid(ctx context.Context, exec boil.ContextExecutor, related *User) error {
-	var err error
-
-	queries.SetScanner(&o.User_Id, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("userid")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	if o.R != nil {
-		o.R.Userid = nil
-	}
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.UseridPatientNotes {
-		if queries.Equal(o.User_Id, ri.User_Id) {
-			continue
-		}
-
-		ln := len(related.R.UseridPatientNotes)
-		if ln > 1 && i < ln-1 {
-			related.R.UseridPatientNotes[i] = related.R.UseridPatientNotes[ln-1]
-		}
-		related.R.UseridPatientNotes = related.R.UseridPatientNotes[:ln-1]
-		break
-	}
 	return nil
 }
 

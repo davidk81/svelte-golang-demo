@@ -7,9 +7,14 @@
   const { session } = stores()
   let patient
   let healthNotes;
+  let error
+
+  let tokens = window.location.search.split("patientid=")
+  let patientid = tokens[tokens.length-1]
+  let newNote = { note: "",  patientid}
 
 	onMount(async () => {
-    const response = await fetch('mock-patient.json', {
+    const response = await fetch('http://localhost:8000/api/v1/patient?patientid=' + patientid, {
       method: 'GET',
       mode: 'cors',
       credentials: 'include',
@@ -17,11 +22,17 @@
         'Content-Type': 'application/json'
       }
     })
-    patient = await response.json();
-	});
+    if (response.ok) {
+      error = null
+      patient = await response.json();
+    }
+    else {
+      error = await response.text()
+    }
+	});    
 
-  onMount(async () => {
-    const response = await fetch('mock-health-notes.json', {
+	onMount(async () => {
+    const response = await fetch('http://localhost:8000/api/v1/patient/notes?patientid=' + patientid, {
       method: 'GET',
       mode: 'cors',
       credentials: 'include',
@@ -29,21 +40,32 @@
         'Content-Type': 'application/json'
       }
     })
-    healthNotes = await response.json();
-	});
+    if (response.ok) {
+      error = null
+      healthNotes = await response.json();
+    }
+    else {
+      error = await response.text()
+    }
+	});  
 </script>
 
 <h1>Patient</h1>
 {#if $session && $session.authenticated}
   {#if patient}
     <div>
-    {patient.name} ({patient.patientId})
+    {patient.name} ({patient.patientid})
     </div>
     {#if healthNotes}
-      {#each healthNotes.records as healthNote}
+      {#each healthNotes as healthNote}
         <HealthNoteView healthNote={healthNote}/>
       {/each}
     {/if}
-    <HealthNoteEdit/>
+    {#if patient}
+      <HealthNoteEdit healthNote={newNote} patient={patient}/>
+    {/if}
   {/if}
+{/if}
+{#if error}
+  {error}
 {/if}

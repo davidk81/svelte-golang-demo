@@ -4,7 +4,7 @@
   export let patient
 
   function onClick() {
-		goto('patient?patientId=' + patient.patientId)
+		goto('patient?patientid=' + patient.patientid)
 	}
 </script>
 

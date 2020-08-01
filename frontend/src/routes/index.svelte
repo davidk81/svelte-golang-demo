@@ -2,12 +2,11 @@
   import { goto, stores } from '@sapper/app'
   
   const { session } = stores()
-  let username = null
+  let username = 'nurse1'
   let password = 'password'
   let error = false
 
   async function login () {
-    console.log('login')
     const response = await fetch('http://localhost:8000/api/v1/session', {
       method: 'POST',
       mode: 'cors',

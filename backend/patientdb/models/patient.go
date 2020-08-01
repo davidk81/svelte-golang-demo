@@ -24,10 +24,10 @@ import (
 
 // Patient is an object representing the database table.
 type Patient struct {
-	Patientid string      `boil:"patientid" json:"patientid" toml:"patientid" yaml:"patientid"`
-	Name      null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
-	Location  null.String `boil:"location" json:"location,omitempty" toml:"location" yaml:"location,omitempty"`
-	Created   null.Time   `boil:"created" json:"created,omitempty" toml:"created" yaml:"created,omitempty"`
+	Patientid string    `boil:"patientid" json:"patientid" toml:"patientid" yaml:"patientid"`
+	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Location  string    `boil:"location" json:"location" toml:"location" yaml:"location"`
+	Created   null.Time `boil:"created" json:"created,omitempty" toml:"created" yaml:"created,omitempty"`
 
 	R *patientR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L patientL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -63,29 +63,6 @@ func (w whereHelperstring) IN(slice []string) qm.QueryMod {
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
 
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 type whereHelpernull_Time struct{ field string }
 
 func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
@@ -111,13 +88,13 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 
 var PatientWhere = struct {
 	Patientid whereHelperstring
-	Name      whereHelpernull_String
-	Location  whereHelpernull_String
+	Name      whereHelperstring
+	Location  whereHelperstring
 	Created   whereHelpernull_Time
 }{
 	Patientid: whereHelperstring{field: "\"patient\".\"patientid\""},
-	Name:      whereHelpernull_String{field: "\"patient\".\"name\""},
-	Location:  whereHelpernull_String{field: "\"patient\".\"location\""},
+	Name:      whereHelperstring{field: "\"patient\".\"name\""},
+	Location:  whereHelperstring{field: "\"patient\".\"location\""},
 	Created:   whereHelpernull_Time{field: "\"patient\".\"created\""},
 }
 
@@ -470,7 +447,7 @@ func (patientL) LoadPatientidPatientNotes(ctx context.Context, e boil.ContextExe
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.Patientid) {
+				if a == obj.Patientid {
 					continue Outer
 				}
 			}
@@ -525,7 +502,7 @@ func (patientL) LoadPatientidPatientNotes(ctx context.Context, e boil.ContextExe
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.Patientid, foreign.Patient_Id) {
+			if local.Patientid == foreign.Patient_Id {
 				local.R.PatientidPatientNotes = append(local.R.PatientidPatientNotes, foreign)
 				if foreign.R == nil {
 					foreign.R = &patientNoteR{}
@@ -547,7 +524,7 @@ func (o *Patient) AddPatientidPatientNotes(ctx context.Context, exec boil.Contex
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.Patient_Id, o.Patientid)
+			rel.Patient_Id = o.Patientid
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -568,7 +545,7 @@ func (o *Patient) AddPatientidPatientNotes(ctx context.Context, exec boil.Contex
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.Patient_Id, o.Patientid)
+			rel.Patient_Id = o.Patientid
 		}
 	}
 
@@ -589,76 +566,6 @@ func (o *Patient) AddPatientidPatientNotes(ctx context.Context, exec boil.Contex
 			rel.R.Patientid = o
 		}
 	}
-	return nil
-}
-
-// SetPatientidPatientNotes removes all previously related items of the
-// patient replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.Patientid's PatientidPatientNotes accordingly.
-// Replaces o.R.PatientidPatientNotes with related.
-// Sets related.R.Patientid's PatientidPatientNotes accordingly.
-func (o *Patient) SetPatientidPatientNotes(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*PatientNote) error {
-	query := "update \"patient_note\" set \"patientid\" = null where \"patientid\" = $1"
-	values := []interface{}{o.Patientid}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.PatientidPatientNotes {
-			queries.SetScanner(&rel.Patient_Id, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.Patientid = nil
-		}
-
-		o.R.PatientidPatientNotes = nil
-	}
-	return o.AddPatientidPatientNotes(ctx, exec, insert, related...)
-}
-
-// RemovePatientidPatientNotes relationships from objects passed in.
-// Removes related items from R.PatientidPatientNotes (uses pointer comparison, removal does not keep order)
-// Sets related.R.Patientid.
-func (o *Patient) RemovePatientidPatientNotes(ctx context.Context, exec boil.ContextExecutor, related ...*PatientNote) error {
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.Patient_Id, nil)
-		if rel.R != nil {
-			rel.R.Patientid = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("patientid")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.PatientidPatientNotes {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.PatientidPatientNotes)
-			if ln > 1 && i < ln-1 {
-				o.R.PatientidPatientNotes[i] = o.R.PatientidPatientNotes[ln-1]
-			}
-			o.R.PatientidPatientNotes = o.R.PatientidPatientNotes[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

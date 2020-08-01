@@ -85,7 +85,7 @@ func route(ctx *fasthttp.RequestCtx) error {
 }
 
 func requestHandler(ctx *fasthttp.RequestCtx) {
-	log.Printf("%s %s\n", ctx.Request.Header.Method(), ctx.Path())
+	log.Printf("%s %s\n", ctx.Request.Header.Method(), ctx.URI().RequestURI())
 
 	// enable cors for development
 	ctx.Response.Header.Set("access-control-allow-credentials", "true")

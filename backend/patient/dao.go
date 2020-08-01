@@ -16,6 +16,16 @@ func GetPatients(ctx *fasthttp.RequestCtx) (models.PatientSlice, error) {
 	return models.Patients(qm.Limit(20)).All(ctx, patientdb.DB())
 }
 
+// GetPatient
+func GetPatient(patientID string, ctx *fasthttp.RequestCtx) (*models.Patient, error) {
+	return models.Patients(models.PatientWhere.Patientid.EQ(patientID)).One(ctx, patientdb.DB())
+}
+
+// GetPatientNotes (list)
+func GetPatientNotes(patientID string, ctx *fasthttp.RequestCtx) (models.PatientNoteSlice, error) {
+	return models.PatientNotes(models.PatientNoteWhere.Patient_Id.EQ(patientID)).All(ctx, patientdb.DB())
+}
+
 // AddPatientNote adds a new note to the patient
 func AddPatientNote(note *models.PatientNote, ctx *fasthttp.RequestCtx) error {
 	id, err := uuid.NewUUID()

@@ -25,8 +25,8 @@ import (
 // User is an object representing the database table.
 type User struct {
 	Userid  string      `boil:"userid" json:"userid" toml:"userid" yaml:"userid"`
-	Name    null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
-	Roles   null.String `boil:"roles" json:"roles,omitempty" toml:"roles" yaml:"roles,omitempty"`
+	Name    string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Roles   string      `boil:"roles" json:"roles" toml:"roles" yaml:"roles"`
 	Secret  null.String `boil:"secret" json:"secret,omitempty" toml:"secret" yaml:"secret,omitempty"`
 	Created null.Time   `boil:"created" json:"created,omitempty" toml:"created" yaml:"created,omitempty"`
 
@@ -50,16 +50,39 @@ var UserColumns = struct {
 
 // Generated where
 
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var UserWhere = struct {
 	Userid  whereHelperstring
-	Name    whereHelpernull_String
-	Roles   whereHelpernull_String
+	Name    whereHelperstring
+	Roles   whereHelperstring
 	Secret  whereHelpernull_String
 	Created whereHelpernull_Time
 }{
 	Userid:  whereHelperstring{field: "\"user\".\"userid\""},
-	Name:    whereHelpernull_String{field: "\"user\".\"name\""},
-	Roles:   whereHelpernull_String{field: "\"user\".\"roles\""},
+	Name:    whereHelperstring{field: "\"user\".\"name\""},
+	Roles:   whereHelperstring{field: "\"user\".\"roles\""},
 	Secret:  whereHelpernull_String{field: "\"user\".\"secret\""},
 	Created: whereHelpernull_Time{field: "\"user\".\"created\""},
 }
@@ -413,7 +436,7 @@ func (userL) LoadUseridPatientNotes(ctx context.Context, e boil.ContextExecutor,
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.Userid) {
+				if a == obj.Userid {
 					continue Outer
 				}
 			}
@@ -468,7 +491,7 @@ func (userL) LoadUseridPatientNotes(ctx context.Context, e boil.ContextExecutor,
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.Userid, foreign.User_Id) {
+			if local.Userid == foreign.User_Id {
 				local.R.UseridPatientNotes = append(local.R.UseridPatientNotes, foreign)
 				if foreign.R == nil {
 					foreign.R = &patientNoteR{}
@@ -490,7 +513,7 @@ func (o *User) AddUseridPatientNotes(ctx context.Context, exec boil.ContextExecu
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.User_Id, o.Userid)
+			rel.User_Id = o.Userid
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -511,7 +534,7 @@ func (o *User) AddUseridPatientNotes(ctx context.Context, exec boil.ContextExecu
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.User_Id, o.Userid)
+			rel.User_Id = o.Userid
 		}
 	}
 
@@ -532,76 +555,6 @@ func (o *User) AddUseridPatientNotes(ctx context.Context, exec boil.ContextExecu
 			rel.R.Userid = o
 		}
 	}
-	return nil
-}
-
-// SetUseridPatientNotes removes all previously related items of the
-// user replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.Userid's UseridPatientNotes accordingly.
-// Replaces o.R.UseridPatientNotes with related.
-// Sets related.R.Userid's UseridPatientNotes accordingly.
-func (o *User) SetUseridPatientNotes(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*PatientNote) error {
-	query := "update \"patient_note\" set \"userid\" = null where \"userid\" = $1"
-	values := []interface{}{o.Userid}
-	if boil.IsDebug(ctx) {
-		writer := boil.DebugWriterFrom(ctx)
-		fmt.Fprintln(writer, query)
-		fmt.Fprintln(writer, values)
-	}
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.UseridPatientNotes {
-			queries.SetScanner(&rel.User_Id, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.Userid = nil
-		}
-
-		o.R.UseridPatientNotes = nil
-	}
-	return o.AddUseridPatientNotes(ctx, exec, insert, related...)
-}
-
-// RemoveUseridPatientNotes relationships from objects passed in.
-// Removes related items from R.UseridPatientNotes (uses pointer comparison, removal does not keep order)
-// Sets related.R.Userid.
-func (o *User) RemoveUseridPatientNotes(ctx context.Context, exec boil.ContextExecutor, related ...*PatientNote) error {
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.User_Id, nil)
-		if rel.R != nil {
-			rel.R.Userid = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("userid")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.UseridPatientNotes {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.UseridPatientNotes)
-			if ln > 1 && i < ln-1 {
-				o.R.UseridPatientNotes[i] = o.R.UseridPatientNotes[ln-1]
-			}
-			o.R.UseridPatientNotes = o.R.UseridPatientNotes[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

@@ -4,7 +4,6 @@ package patient
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/davidk81/svelte-golang-demo/backend/patientdb/models"
 	"github.com/valyala/fasthttp"
@@ -55,17 +54,18 @@ func handleMethodNotePost(ctx *fasthttp.RequestCtx) error {
 }
 
 func handleMethodNoteGetList(ctx *fasthttp.RequestCtx) error {
+	patientID := string(ctx.QueryArgs().Peek("patientid"))
+
 	// return patient info in response
-	p, err := GetPatients(ctx)
+	p, err := GetPatientNotes(patientID, ctx)
 	if err != nil {
 		return err
 	}
 	b, err := json.Marshal(p)
-	log.Println(string(b))
 	if err != nil {
 		return err
 	}
 	ctx.SetBody([]byte(b))
-	ctx.SetStatusCode(fasthttp.StatusCreated)
+	ctx.SetStatusCode(fasthttp.StatusOK)
 	return nil
 }

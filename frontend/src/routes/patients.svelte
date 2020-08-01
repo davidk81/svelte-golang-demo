@@ -5,6 +5,7 @@
 
   const { session } = stores()
   let patients
+  let error
 
 	onMount(async () => {
     const response = await fetch('http://localhost:8000/api/v1/patients', {
@@ -15,7 +16,13 @@
         'Content-Type': 'application/json'
       }
     })
-    patients = await response.json();
+    if (response.ok) {
+      error = null
+      patients = await response.json();
+    }
+    else {
+      error = await response.text()
+    }
 	});
 </script>
 
@@ -26,4 +33,7 @@
       <Patient patient={patient}/>
     {/each}
   {/if}
+{/if}
+{#if error}
+  {error}
 {/if}

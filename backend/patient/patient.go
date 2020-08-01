@@ -17,6 +17,8 @@ type Patient struct {
 // HandlePatient entrypoint http request handler for /patient
 func HandlePatient(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Request.Header.Method()) {
+	case "GET":
+		return handleMethodGet(ctx)
 	case "POST":
 		return handleMethodPost(ctx)
 	case "DELETE":
@@ -67,7 +69,6 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 }
 
 func handleMethodGetList(ctx *fasthttp.RequestCtx) error {
-	// return patient info in response
 	p, err := GetPatients(ctx)
 	if err != nil {
 		return err
@@ -77,6 +78,23 @@ func handleMethodGetList(ctx *fasthttp.RequestCtx) error {
 		return err
 	}
 	ctx.SetBody([]byte(b))
-	ctx.SetStatusCode(fasthttp.StatusCreated)
+	ctx.SetStatusCode(fasthttp.StatusOK)
+	return nil
+}
+
+func handleMethodGet(ctx *fasthttp.RequestCtx) error {
+	patientID := string(ctx.QueryArgs().Peek("patientid"))
+
+	// return patient info in response
+	p, err := GetPatient(patientID, ctx)
+	if err != nil {
+		return err
+	}
+	b, err := json.Marshal(p)
+	if err != nil {
+		return err
+	}
+	ctx.SetBody([]byte(b))
+	ctx.SetStatusCode(fasthttp.StatusOK)
 	return nil
 }
