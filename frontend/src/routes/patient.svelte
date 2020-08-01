@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { stores } from '@sapper/app'
+  import Patient from '../components/Patient.svelte';
   import HealthNoteView from '../components/HealthNoteView.svelte';
   import HealthNoteEdit from '../components/HealthNoteEdit.svelte';
   
@@ -55,9 +56,7 @@
 <h1>Patient</h1>
 {#if $session && $session.authenticated}
   {#if patient}
-    <div>
-    {patient.name} ({patient.patientid})
-    </div>
+    <Patient patient={patient}/>
     {#if healthNotes}
       {#each healthNotes as healthNote}
         <HealthNoteView healthNote={healthNote}/>

@@ -11,7 +11,18 @@
 </style>
 
 <div>
-{healthNote.note}<br/>
-by : {healthNote.userid}<br/>
-date: {new Date(healthNote.created)}<br/>
+  <table>
+    <tr>
+      <td>Health Note:</td>
+      <td>{healthNote.note}</td>
+    </tr>
+    <tr>
+      <td>Nurse:</td>
+      <td>{healthNote.userid}</td>
+    </tr>
+    <tr>
+      <td>Date:</td>
+      <td>{new Date(healthNote.created)}</td>
+    </tr>
+  </table>
 </div>

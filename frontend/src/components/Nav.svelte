@@ -70,7 +70,7 @@
 		{#if $session.profile.roles.includes('admin')}
 			<li><a aria-current='{segment === "admin" ? "page" : undefined}' href='admin'>admin</a></li>
 		{/if}
-		<li><a aria-current='{segment === "profile" ? "page" : undefined}' href='profile'>profile</a></li>
+		<!-- <li><a aria-current='{segment === "profile" ? "page" : undefined}' href='profile'>profile</a></li> -->
 		<li><a href='logout'>log out</a></li>
     {/if}
 </ul>

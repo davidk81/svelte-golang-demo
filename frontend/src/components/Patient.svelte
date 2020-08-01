@@ -15,11 +15,21 @@
     margin: 5px;
     cursor: pointer;
   }
+  td {
+    margin: 5px;
+    padding: 5px;
+  }
 </style>
 
 <div on:click={onClick}>
-<span>{patient.patientid},</span>
-<span>{patient.name},</span>
-<span>{patient.location},</span>
-<span>{patient.created}</span>
+  <table>
+    <tr>
+      <td>Name:</td>
+      <td>{patient.name}</td>
+    </tr>
+    <tr>
+      <td>Location:</td>
+      <td>{patient.location}</td>
+    </tr>
+  </table>
 </div>
