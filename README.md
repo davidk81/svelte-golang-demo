@@ -118,6 +118,7 @@ todo:
 ```sh
 # untag image & trigger rebuild
 docker rmi svelte-golang-demo_backend
+docker rmi svelte-golang-demo_frontend
 
 # start
 docker-compose up

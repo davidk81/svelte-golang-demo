@@ -28,7 +28,8 @@
                     }
                 });
       error = !!profile
-      goto('patients')
+      if (profile.roles.includes('nurse'))
+        goto('patients')
     } else {
       session.update(() => {
                     return {

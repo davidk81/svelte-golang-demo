@@ -5,7 +5,8 @@ package session
 
 import (
 	"encoding/json"
-	"log"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/davidk81/svelte-golang-demo/backend/user"
@@ -115,7 +116,6 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 func handleMethodGet(ctx *fasthttp.RequestCtx) error {
 	// TODO: verify token & parse username
 	ValidateSession(ctx)
-	log.Println(ctx.Request.Header.Cookie(sessionToken))
 
 	// fetch user
 	user, err := user.GetUser("username", ctx)
@@ -138,7 +138,48 @@ func handleMethodGet(ctx *fasthttp.RequestCtx) error {
 }
 
 // ValidateSession and check user has atleast one of the roles
-func ValidateSession(ctx *fasthttp.RequestCtx, role ...string) bool {
-	// TODO:
-	return true
+func ValidateSession(ctx *fasthttp.RequestCtx, roles ...string) (*user.UserWebResponse, error) {
+	token, err := verifyToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(token.Claims)
+	if err != nil {
+		return nil, err
+	}
+	var claims Claims
+	err = json.Unmarshal(b, &claims)
+	if err != nil {
+		return nil, err
+	}
+	if claims.ExpiresAt < time.Now().Unix() {
+		return nil, errors.New("session expired")
+	}
+	user, err := user.GetUserWebResponse(claims.Username, ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, requiredRole := range roles {
+		for _, myRole := range user.Roles {
+			if requiredRole == myRole {
+				return user, nil
+			}
+		}
+	}
+	return nil, errors.New("user doesn't have role")
+}
+
+func verifyToken(ctx *fasthttp.RequestCtx) (*jwt.Token, error) {
+	tokenString := string(ctx.Request.Header.Cookie(sessionToken))
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		//Make sure that the token method conform to "SigningMethodHMAC"
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return jwtKey, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return token, nil
 }

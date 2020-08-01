@@ -1,5 +1,8 @@
 package main
 
+// backend http server for patient service demo
+// usage: ./backend --help
+
 import (
 	"flag"
 	"fmt"
@@ -15,6 +18,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+// config flags
 var (
 	dbConn   = flag.String("db", "host=localhost dbname=patientdb user=docker password=docker sslmode=disable", "db connection string")
 	addr     = flag.String("addr", "localhost:8000", "tcp listen address & port")
@@ -60,6 +64,19 @@ func route(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Path()) {
 	case "/api/v1/session":
 		return session.HandleSession(ctx)
+	case "/healthz":
+		return handleHealth(ctx)
+	}
+
+	// check users' session token
+	_, err := session.ValidateSession(ctx, "nurse")
+	if err != nil {
+		ctx.Response.SetStatusCode(fasthttp.StatusUnauthorized)
+		return nil
+	}
+
+	// routes that need session
+	switch string(ctx.Path()) {
 	case "/api/v1/patients":
 		return patient.HandlePatientList(ctx)
 	case "/api/v1/patient":
@@ -68,14 +85,6 @@ func route(ctx *fasthttp.RequestCtx) error {
 		return patient.HandlePatientNote(ctx)
 	case "/api/v1/patient/notes":
 		return patient.HandlePatientNoteList(ctx)
-	}
-
-	// routes that need session
-	if !session.ValidateSession(ctx, "nurse") {
-		ctx.Response.SetStatusCode(fasthttp.StatusUnauthorized)
-	}
-
-	switch string(ctx.Path()) {
 	default:
 		ctx.NotFound()
 		return nil
@@ -112,4 +121,9 @@ func handleMethodOptions(ctx *fasthttp.RequestCtx) {
 	ctx.Response.Header.Set("access-control-allow-methods", string(ctx.Request.Header.Peek("Access-Control-Request-Method")))
 	ctx.Response.Header.Set("access-control-max-age", "86400")
 	ctx.SetStatusCode(fasthttp.StatusOK)
+}
+
+func handleHealth(ctx *fasthttp.RequestCtx) error {
+	ctx.SetStatusCode(fasthttp.StatusOK)
+	return nil
 }

@@ -45,6 +45,20 @@ func Login(username, password string, ctx *fasthttp.RequestCtx) (*UserWebRespons
 	}, nil
 }
 
+// GetUserWebResponse for retrieving an already validated session
+func GetUserWebResponse(username string, ctx *fasthttp.RequestCtx) (*UserWebResponse, error) {
+	user, err := GetUser(username, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UserWebResponse{
+		Name:     user.Name,
+		Username: user.Userid,
+		Roles:    strings.Split(user.Roles, ","),
+	}, nil
+}
+
 func handleMethodDelete(ctx *fasthttp.RequestCtx) error {
 	// TODO:
 	ctx.SetStatusCode(fasthttp.StatusNotImplemented)
