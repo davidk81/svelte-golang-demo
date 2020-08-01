@@ -83,11 +83,11 @@ func hashAndSaltPassword(pwd []byte) (string, error) {
 
 // compaire plain-text password against a hashed-and-salted password
 // https://medium.com/@jcox250/password-hash-salt-using-golang-b041dc94cb72
-func comparePasswords(hashedPwd string, plainPwd []byte) (bool, error) {
+func verifyPassword(hashedPwd string, plainPwd []byte) error {
 	byteHash := []byte(hashedPwd)
 	err := bcrypt.CompareHashAndPassword(byteHash, plainPwd)
 	if err != nil {
-		return false, err
+		return err
 	}
-	return true, nil
+	return nil
 }
