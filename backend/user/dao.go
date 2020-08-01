@@ -1,19 +1,14 @@
 package user
 
+import (
+	"github.com/davidk81/svelte-golang-demo/backend/patientdb"
+	"github.com/davidk81/svelte-golang-demo/backend/patientdb/models"
+	"github.com/valyala/fasthttp"
+)
+
 // handles database operations for user table
 
-//
-type User struct {
-	Name     string   `json:"name"`
-	Username string   `json:"username"`
-	Roles    []string `json:"roles"`
-}
-
 // GetUser checks username & password, and returns User data if successful
-func GetUser(username string) *User {
-	return &User{
-		Name:     username,
-		Username: username,
-		Roles:    []string{"nurse", "admin"},
-	}
+func GetUser(username string, ctx *fasthttp.RequestCtx) (*models.User, error) {
+	return models.Users(models.UserWhere.Userid.EQ(username)).One(ctx, patientdb.DB())
 }

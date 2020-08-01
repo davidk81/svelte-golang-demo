@@ -69,7 +69,10 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 	}
 
 	// check password
-	user := user.Login(creds.Username, creds.Password)
+	user, err := user.Login(creds.Username, creds.Password, ctx)
+	if err != nil {
+		return err
+	}
 	if user == nil {
 		ctx.SetStatusCode(fasthttp.StatusUnauthorized)
 		return nil
@@ -115,7 +118,10 @@ func handleMethodGet(ctx *fasthttp.RequestCtx) error {
 	log.Println(ctx.Request.Header.Cookie(sessionToken))
 
 	// fetch user
-	user := user.GetUser("username")
+	user, err := user.GetUser("username", ctx)
+	if err != nil {
+		return err
+	}
 	if user == nil {
 		ctx.SetStatusCode(fasthttp.StatusUnauthorized)
 		return nil

@@ -5,14 +5,9 @@ package patient
 import (
 	"encoding/json"
 
+	"github.com/davidk81/svelte-golang-demo/backend/patientdb/models"
 	"github.com/valyala/fasthttp"
 )
-
-// Patient struct for (de)marshalling
-type Patient struct {
-	PatientID string `json:"patientId"`
-	Name      string `json:"name"`
-}
 
 // HandlePatient entrypoint http request handler for /patient
 func HandlePatient(ctx *fasthttp.RequestCtx) error {
@@ -20,9 +15,9 @@ func HandlePatient(ctx *fasthttp.RequestCtx) error {
 	case "GET":
 		return handleMethodGet(ctx)
 	case "POST":
-		return handleMethodPost(ctx)
+		return handleMethodPost(ctx) // not implemented
 	case "DELETE":
-		return handleMethodDelete(ctx)
+		return handleMethodDelete(ctx) // not implemented
 	default:
 		ctx.NotFound()
 		return nil
@@ -42,13 +37,13 @@ func HandlePatientList(ctx *fasthttp.RequestCtx) error {
 
 func handleMethodDelete(ctx *fasthttp.RequestCtx) error {
 	// TODO
-	ctx.SetStatusCode(fasthttp.StatusOK)
+	ctx.SetStatusCode(fasthttp.StatusNotImplemented)
 	return nil
 }
 
 func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 	// decode post body
-	var patient Patient
+	var patient models.Patient
 	err := json.Unmarshal(ctx.Request.Body(), &patient)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -64,7 +59,8 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 		return err
 	}
 	ctx.SetBody([]byte(b))
-	ctx.SetStatusCode(fasthttp.StatusCreated)
+	// ctx.SetStatusCode(fasthttp.StatusCreated)
+	ctx.SetStatusCode(fasthttp.StatusNotImplemented)
 	return nil
 }
 
