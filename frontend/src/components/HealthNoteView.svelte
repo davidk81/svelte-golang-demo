@@ -12,6 +12,6 @@
 
 <div>
 {healthNote.note}<br/>
-by : {healthNote.nurseid}<br/>
+by : {healthNote.userid}<br/>
 date: {new Date(healthNote.created)}<br/>
 </div>

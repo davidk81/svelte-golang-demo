@@ -4,6 +4,7 @@
   const { session } = stores()
   export let patient
   export let healthNote
+  export let onUpdated
   let note = ""
   let error
 
@@ -24,6 +25,8 @@
     })
     if (response.ok) {
       error = null
+      note = ""
+      if (onUpdated != null) onUpdated()
     }
     else {
       error = await response.text()

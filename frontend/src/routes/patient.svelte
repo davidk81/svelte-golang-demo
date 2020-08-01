@@ -31,7 +31,7 @@
     }
 	});    
 
-	onMount(async () => {
+  var refreshNotes = async () => {
     const response = await fetch('http://localhost:8000/api/v1/patient/notes?patientid=' + patientid, {
       method: 'GET',
       mode: 'cors',
@@ -47,7 +47,9 @@
     else {
       error = await response.text()
     }
-	});  
+  }
+
+	onMount(refreshNotes);  
 </script>
 
 <h1>Patient</h1>
@@ -62,7 +64,7 @@
       {/each}
     {/if}
     {#if patient}
-      <HealthNoteEdit healthNote={newNote} patient={patient}/>
+      <HealthNoteEdit onUpdated={refreshNotes} healthNote={newNote} patient={patient}/>
     {/if}
   {/if}
 {/if}
