@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS "patient_note";
+DROP TABLE IF EXISTS "patient";
+DROP TABLE IF EXISTS "user";

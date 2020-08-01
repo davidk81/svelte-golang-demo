@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  postgres-db:
+    image: postgres:11
+    volumes:
+      - ./postgres-db/pgdata/pgdata
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - PGDATA=/pgdata
+      - POSTGRES_DB=patientdb
