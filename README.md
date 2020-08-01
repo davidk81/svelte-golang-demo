@@ -123,7 +123,7 @@ docker rmi svelte-golang-demo_frontend
 # start
 docker-compose up
 
-# surf
+# surf http://localhost:5000/
 
 # stop
 docker-compose down
