@@ -1,5 +1,6 @@
-// based on https://github.com/sohamkamani/jwt-go-example
 package user
+
+// handles database operations for user table
 
 //
 type User struct {

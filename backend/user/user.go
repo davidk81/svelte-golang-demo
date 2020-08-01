@@ -1,24 +1,24 @@
-// based on https://github.com/sohamkamani/jwt-go-example
 package user
+
+// handles http requests for /patient and /patients
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 
 	"github.com/valyala/fasthttp"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // HandleUser entrypoint http request handler
-func HandleUser(ctx *fasthttp.RequestCtx) {
+func HandleUser(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Request.Header.Method()) {
 	case "POST":
-		handleMethodPost(ctx)
+		return handleMethodPost(ctx)
 	case "DELETE":
-		handleMethodDelete(ctx)
+		return handleMethodDelete(ctx)
 	default:
 		ctx.Error("Unsupported path", fasthttp.StatusNotFound)
+		return nil
 	}
 }
 
@@ -28,47 +28,48 @@ func Login(username, password string) *User {
 	return GetUser(username)
 }
 
-func handleMethodDelete(ctx *fasthttp.RequestCtx) {
+func handleMethodDelete(ctx *fasthttp.RequestCtx) error {
+	// TODO:
 	ctx.SetStatusCode(fasthttp.StatusOK)
+	return nil
 }
 
-func handleMethodPost(ctx *fasthttp.RequestCtx) {
+func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 	// decode post body
 	var user User
 	err := json.Unmarshal(ctx.Request.Body(), &user)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
-		return
+		return nil
 	}
 
 	// return user info in response
 	b, err := json.Marshal(user)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	ctx.SetBody([]byte(b))
 	ctx.SetStatusCode(fasthttp.StatusCreated)
+	return nil
 }
 
 // generate a hashed-and-salted password from plain-text password. return value can be stored in db
 // https://medium.com/@jcox250/password-hash-salt-using-golang-b041dc94cb72
-func hashAndSaltPassword(pwd []byte) string {
+func hashAndSaltPassword(pwd []byte) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
 	if err != nil {
-		log.Println(err)
+		return "", err
 	}
-	return string(hash)
+	return string(hash), nil
 }
 
 // compaire plain-text password against a hashed-and-salted password
 // https://medium.com/@jcox250/password-hash-salt-using-golang-b041dc94cb72
-func comparePasswords(hashedPwd string, plainPwd []byte) bool {
+func comparePasswords(hashedPwd string, plainPwd []byte) (bool, error) {
 	byteHash := []byte(hashedPwd)
 	err := bcrypt.CompareHashAndPassword(byteHash, plainPwd)
 	if err != nil {
-		log.Println(err)
-		return false
+		return false, err
 	}
-	return true
+	return true, nil
 }

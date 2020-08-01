@@ -1,18 +1,20 @@
 package patient
 
+// handles http requests for /patient and /patients
+
 import (
 	"encoding/json"
 
 	"github.com/valyala/fasthttp"
 )
 
-//Patient struct for (de)marshalling
+// Patient struct for (de)marshalling
 type Patient struct {
 	PatientID string `json:"patientId"`
 	Name      string `json:"name"`
 }
 
-// HandlePatient entrypoint http request handler
+// HandlePatient entrypoint http request handler for /patient
 func HandlePatient(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Request.Header.Method()) {
 	case "POST":
@@ -25,7 +27,7 @@ func HandlePatient(ctx *fasthttp.RequestCtx) error {
 	}
 }
 
-// HandlePatientList entrypoint http request handler
+// HandlePatientList entrypoint http request handler for /patients
 func HandlePatientList(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Request.Header.Method()) {
 	case "GET":

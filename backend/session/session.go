@@ -1,5 +1,7 @@
-// jwt token generation based on https://github.com/sohamkamani/jwt-go-example
 package session
+
+// handles http auth requests for path /session
+// jwt token generation based on https://github.com/sohamkamani/jwt-go-example
 
 import (
 	"encoding/json"
@@ -44,6 +46,7 @@ func HandleSession(ctx *fasthttp.RequestCtx) error {
 	}
 }
 
+// logs out user by invalidating session token
 func handleMethodDelete(ctx *fasthttp.RequestCtx) error {
 	var c fasthttp.Cookie
 	c.SetKey(sessionToken)
@@ -54,6 +57,8 @@ func handleMethodDelete(ctx *fasthttp.RequestCtx) error {
 	return nil
 }
 
+// authenticates user by checking credentials, and sets session token
+// if success, responds with user details in post body
 func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 	// decode login credentials from body
 	var creds Credentials
@@ -103,9 +108,10 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 	return nil
 }
 
+// validates session and returns user info in response body
 func handleMethodGet(ctx *fasthttp.RequestCtx) error {
 	// TODO: verify token & parse username
-	VerifySession(ctx)
+	ValidateSession(ctx)
 	log.Println(ctx.Request.Header.Cookie(sessionToken))
 
 	// fetch user
@@ -125,8 +131,8 @@ func handleMethodGet(ctx *fasthttp.RequestCtx) error {
 	return nil
 }
 
-// VerifySession and check user has atleast one of the roles
-func VerifySession(ctx *fasthttp.RequestCtx, role ...string) bool {
+// ValidateSession and check user has atleast one of the roles
+func ValidateSession(ctx *fasthttp.RequestCtx, role ...string) bool {
 	// TODO:
 	return true
 }

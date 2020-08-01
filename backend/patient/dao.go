@@ -1,5 +1,7 @@
 package patient
 
+// handles database operations for patient and patient_notes tables
+
 import (
 	"github.com/davidk81/svelte-golang-demo/backend/patientdb"
 	"github.com/davidk81/svelte-golang-demo/backend/patientdb/models"
@@ -8,8 +10,6 @@ import (
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 )
-
-// var patients = []Patient{{PatientID: "patient1", Name: "Peter"}, {PatientID: "patient2", Name: "Paul"}, {PatientID: "patient3", Name: "Patrick"}}
 
 // GetPatients (list)
 func GetPatients(ctx *fasthttp.RequestCtx) (models.PatientSlice, error) {

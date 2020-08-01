@@ -73,7 +73,7 @@ func route(ctx *fasthttp.RequestCtx) error {
 	}
 
 	// routes that need session
-	if !session.VerifySession(ctx, "nurse") {
+	if !session.ValidateSession(ctx, "nurse") {
 		ctx.Response.SetStatusCode(fasthttp.StatusUnauthorized)
 	}
 

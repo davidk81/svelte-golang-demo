@@ -1,5 +1,7 @@
 package patient
 
+// handles http requests for /patient/note and /patient/notes
+
 import (
 	"encoding/json"
 	"log"
@@ -14,20 +16,20 @@ func HandlePatientNote(ctx *fasthttp.RequestCtx) error {
 	case "POST":
 		return handleMethodNotePost(ctx)
 	default:
-		ctx.Error("Unsupported path", fasthttp.StatusNotFound)
+		ctx.NotFound()
+		return nil
 	}
-	return nil
 }
 
 // HandlePatientNoteList entrypoint http request handler /patient/notes
 func HandlePatientNoteList(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Request.Header.Method()) {
 	case "GET":
-		handleMethodNoteGetList(ctx)
+		return handleMethodNoteGetList(ctx)
 	default:
-		ctx.Error("Unsupported path", fasthttp.StatusNotFound)
+		ctx.NotFound()
+		return nil
 	}
-	return nil
 }
 
 func handleMethodNotePost(ctx *fasthttp.RequestCtx) error {
