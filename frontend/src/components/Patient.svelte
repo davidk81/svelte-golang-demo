@@ -18,5 +18,8 @@
 </style>
 
 <div on:click={onClick}>
-{patient.name} ({patient.patientId})
+<span>{patient.patientid},</span>
+<span>{patient.name},</span>
+<span>{patient.location},</span>
+<span>{patient.created}</span>
 </div>

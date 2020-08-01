@@ -10,16 +10,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-//
-type User struct {
-	Name     string   `json:"name"`
-	Username string   `json:"username"`
-	Roles    []string `json:"roles"`
-}
-
 // HandleUser entrypoint http request handler
 func HandleUser(ctx *fasthttp.RequestCtx) {
-
 	switch string(ctx.Request.Header.Method()) {
 	case "POST":
 		handleMethodPost(ctx)
@@ -32,12 +24,8 @@ func HandleUser(ctx *fasthttp.RequestCtx) {
 
 // Login checks username & password, and returns User data if successful
 func Login(username, password string) *User {
-	// check password
-	return &User{
-		Name:     username,
-		Username: username,
-		Roles:    []string{"nurse", "admin"},
-	}
+	// TODO: check password
+	return GetUser(username)
 }
 
 func handleMethodDelete(ctx *fasthttp.RequestCtx) {

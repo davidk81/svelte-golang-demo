@@ -3,21 +3,21 @@ package patient
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
+	"github.com/davidk81/svelte-golang-demo/backend/session"
 	"github.com/valyala/fasthttp"
 )
 
-// Patient struct for (de)marshalling
+//Patient struct for (de)marshalling
 type Patient struct {
 	PatientID string `json:"patientId"`
 	Name      string `json:"name"`
 }
 
-var patients = []Patient{{PatientID: "patient1", Name: "Peter"}, {PatientID: "patient2", Name: "Paul"}, {PatientID: "patient3", Name: "Patrick"}}
-
 // HandlePatient entrypoint http request handler
 func HandlePatient(ctx *fasthttp.RequestCtx) {
-
+	session.VerifySession(ctx, "nurse")
 	switch string(ctx.Request.Header.Method()) {
 	case "POST":
 		handleMethodPost(ctx)
@@ -30,7 +30,7 @@ func HandlePatient(ctx *fasthttp.RequestCtx) {
 
 // HandlePatientList entrypoint http request handler
 func HandlePatientList(ctx *fasthttp.RequestCtx) {
-
+	session.VerifySession(ctx, "nurse")
 	switch string(ctx.Request.Header.Method()) {
 	case "GET":
 		handleMethodGetList(ctx)
@@ -52,6 +52,9 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
+	// TODO: validate data
+	// TODO: insert to db
+
 	// return patient info in response
 	b, err := json.Marshal(patient)
 	if err != nil {
@@ -64,7 +67,13 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) {
 
 func handleMethodGetList(ctx *fasthttp.RequestCtx) {
 	// return patient info in response
-	b, err := json.Marshal(patients)
+	p, err := GetPatients(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	b, err := json.Marshal(p)
+	log.Println(string(b))
 	if err != nil {
 		fmt.Println(err)
 		return

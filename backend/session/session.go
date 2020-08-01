@@ -4,6 +4,7 @@ package session
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/davidk81/svelte-golang-demo/backend/user"
@@ -34,6 +35,8 @@ func HandleSession(ctx *fasthttp.RequestCtx) {
 	switch string(ctx.Request.Header.Method()) {
 	case "POST":
 		handleMethodPost(ctx)
+	case "GET":
+		handleMethodGet(ctx)
 	case "DELETE":
 		handleMethodDelete(ctx)
 	default:
@@ -98,4 +101,32 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) {
 	}
 	ctx.SetBody([]byte(b))
 	ctx.SetStatusCode(fasthttp.StatusCreated)
+}
+
+func handleMethodGet(ctx *fasthttp.RequestCtx) {
+	// TODO: verify token & parse username
+	VerifySession(ctx)
+	log.Println(ctx.Request.Header.Cookie(sessionToken))
+
+	// fetch user
+	user := user.GetUser("username")
+	if user == nil {
+		ctx.SetStatusCode(fasthttp.StatusUnauthorized)
+		return
+	}
+
+	// return user info in response, such as roles
+	b, err := json.Marshal(user)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	ctx.SetBody([]byte(b))
+	ctx.SetStatusCode(fasthttp.StatusOK)
+}
+
+// VerifySession and check user has atleast one of the roles
+func VerifySession(ctx *fasthttp.RequestCtx, role ...string) bool {
+	// TODO:
+	return true
 }

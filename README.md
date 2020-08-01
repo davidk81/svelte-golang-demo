@@ -83,11 +83,12 @@ data is persisted by backend using sql interface. any popular sql backend such m
 	- backend (folder)
 		- src code
 		- Dockerfiles for dev & testing
-	- db schema (folder)
+	- db-schema (folder)
 		- schema definition
 		- pre-seeded data for dev/testing
-		- db schema migration scripts
-	- integration tests (folder)
+		- db schema migration scripts (https://github.com/golang-migrate/migrate)
+		- db orm generator (sqlboiler, https://github.com/lqs/sqlingo)
+	- integration-tests (folder)
 		- synthetic testing (eg. selenium)
 		- Docker-compose files for dev & testing
 	- cicd (folder)
@@ -106,3 +107,14 @@ frontend website can deployed as static website; CDN may be utilized. Backend se
 ## service monitoring consideration
 
 frontend can be instrucmented with services such as Google Analytics. backend goLang services can be instrumented for Prometheus using official [go client](https://github.com/prometheus/client_golang), and for OpenTracing using [OpenTracing API for Go](https://github.com/opentracing/opentracing-go)
+
+## work in progress
+
+todo:
+- client session no persisting propery across refresh
+
+## running locally
+
+```sh
+docker run -d --name postgres-patients -v my_dbdata:/var/lib/postgresql/data -p 54320:5432 postgres:11
+```

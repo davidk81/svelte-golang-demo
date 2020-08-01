@@ -1,11 +1,14 @@
 package main
 
+//go:generate sqlboiler --wipe psql
+
 import (
 	"flag"
 	"log"
 
 	"github.com/davidk81/svelte-golang-demo/backend/patient"
 	"github.com/davidk81/svelte-golang-demo/backend/session"
+	_ "github.com/lib/pq"
 	"github.com/valyala/fasthttp"
 )
 
@@ -52,6 +55,9 @@ func requestHandler(ctx *fasthttp.RequestCtx) {
 	default:
 		ctx.Error("Unsupported path", fasthttp.StatusNotFound)
 	}
+
+	session.VerifySession(ctx, "nurse")
+
 }
 
 func handleMethodOptions(ctx *fasthttp.RequestCtx) {

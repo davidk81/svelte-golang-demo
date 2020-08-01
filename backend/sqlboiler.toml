@@ -1,0 +1,13 @@
+pkgname="models"
+output="db/models"
+schema="public"
+[psql]
+    dbname = "patientdb"
+    user = "docker"
+    pass = "docker"
+    host = "localhost"
+    sslmode = "disable"
+
+[aliases.tables.patient_note.columns]
+patientid = "fkPatientId"
+userid = "fkUserId"
