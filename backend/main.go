@@ -1,5 +1,6 @@
 package main
 
+// line below enables 'go generate' cmd to update orm stubs
 //go:generate sqlboiler --wipe psql
 
 import (
@@ -18,14 +19,14 @@ import (
 )
 
 var (
-	addr     = flag.String("addr", ":8000", "TCP address to listen to")
-	compress = flag.Bool("compress", false, "Whether to enable transparent response compression")
+	addr     = flag.String("addr", "localhost:8000", "tcp listen address & port")
+	compress = flag.Bool("compress", false, "response compression [true/false]")
 )
 
 func main() {
 	flag.Parse()
 
-	// init db
+	// init db connection
 	patientdb.Init()
 
 	h := requestHandler
@@ -33,14 +34,15 @@ func main() {
 		h = fasthttp.CompressHandler(h)
 	}
 
+	// start server
 	go func() {
 		log.Println("server starting on port", *addr)
 		if err := fasthttp.ListenAndServe(*addr, h); err != nil {
-			log.Fatalf("Error in ListenAndServe: %s", err)
+			log.Fatalf("error during ListenAndServe: %s", err)
 		}
 	}()
 
-	// cleanup
+	// wait for cleanup signal
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -49,11 +51,14 @@ func main() {
 		done <- true
 	}()
 	<-done
+
+	// cleanup
 	patientdb.Close()
 }
 
 func route(ctx *fasthttp.RequestCtx) error {
-	// route that dont need session
+	// routes that dont need session
+	// TODO: enable session checking
 	switch string(ctx.Path()) {
 	case "/api/v1/session":
 		return session.HandleSession(ctx)
@@ -82,18 +87,19 @@ func route(ctx *fasthttp.RequestCtx) error {
 func requestHandler(ctx *fasthttp.RequestCtx) {
 	log.Printf("%s %s\n", ctx.Request.Header.Method(), ctx.Path())
 
+	// enable cors for development
 	ctx.Response.Header.Set("access-control-allow-credentials", "true")
 	ctx.Response.Header.Set("access-control-allow-origin", string(ctx.Request.Header.Peek("Origin")))
 	ctx.Response.Header.Set("access-control-expose-headers", "WWW-Authenticate,Server-Authorization")
 	ctx.Response.Header.Set("cache-control", "no-cache")
 	ctx.Response.Header.Set("Connection", "keep-alive")
 
-	switch string(ctx.Request.Header.Method()) {
-	case "OPTIONS":
+	if ctx.IsOptions() {
 		handleMethodOptions(ctx)
 		return
 	}
 
+	// handle request routes
 	err := route(ctx)
 	if err != nil {
 		fmt.Println(err)

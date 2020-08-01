@@ -3,7 +3,6 @@ package patient
 import (
 	"encoding/json"
 
-	"github.com/davidk81/svelte-golang-demo/backend/session"
 	"github.com/valyala/fasthttp"
 )
 
@@ -15,7 +14,6 @@ type Patient struct {
 
 // HandlePatient entrypoint http request handler
 func HandlePatient(ctx *fasthttp.RequestCtx) error {
-	session.VerifySession(ctx, "nurse")
 	switch string(ctx.Request.Header.Method()) {
 	case "POST":
 		return handleMethodPost(ctx)
@@ -29,7 +27,6 @@ func HandlePatient(ctx *fasthttp.RequestCtx) error {
 
 // HandlePatientList entrypoint http request handler
 func HandlePatientList(ctx *fasthttp.RequestCtx) error {
-	session.VerifySession(ctx, "nurse")
 	switch string(ctx.Request.Header.Method()) {
 	case "GET":
 		return handleMethodGetList(ctx)

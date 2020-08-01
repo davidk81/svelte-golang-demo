@@ -5,13 +5,11 @@ import (
 	"log"
 
 	"github.com/davidk81/svelte-golang-demo/backend/patientdb/models"
-	"github.com/davidk81/svelte-golang-demo/backend/session"
 	"github.com/valyala/fasthttp"
 )
 
 // HandlePatientNote entrypoint http request handler /patient/note
 func HandlePatientNote(ctx *fasthttp.RequestCtx) error {
-	session.VerifySession(ctx, "nurse")
 	switch string(ctx.Request.Header.Method()) {
 	case "POST":
 		return handleMethodNotePost(ctx)
@@ -23,7 +21,6 @@ func HandlePatientNote(ctx *fasthttp.RequestCtx) error {
 
 // HandlePatientNoteList entrypoint http request handler /patient/notes
 func HandlePatientNoteList(ctx *fasthttp.RequestCtx) error {
-	session.VerifySession(ctx, "nurse")
 	switch string(ctx.Request.Header.Method()) {
 	case "GET":
 		handleMethodNoteGetList(ctx)

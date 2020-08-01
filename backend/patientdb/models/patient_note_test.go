@@ -888,7 +888,7 @@ func testPatientNotesSelect(t *testing.T) {
 }
 
 var (
-	patientNoteDBTypes = map[string]string{`Noteid`: `character varying`, `Patient_Id`: `character varying`, `User_Id`: `character varying`, `Note`: `character varying`, `Created`: `timestamp with time zone`}
+	patientNoteDBTypes = map[string]string{`Noteid`: `character`, `Patient_Id`: `character varying`, `User_Id`: `character varying`, `Note`: `character varying`, `Created`: `timestamp with time zone`}
 	_                  = bytes.MinRead
 )
 
