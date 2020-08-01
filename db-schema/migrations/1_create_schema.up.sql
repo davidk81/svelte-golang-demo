@@ -14,7 +14,7 @@ CREATE TABLE "user" (
 );
 
 CREATE TABLE "patient_note" (
-  noteid varchar(255) primary key,
+  noteid char(64) primary key,
   patientid varchar(100) references "patient"(patientid),
   userid varchar(100) references "user"(userid),
   note varchar(4096),

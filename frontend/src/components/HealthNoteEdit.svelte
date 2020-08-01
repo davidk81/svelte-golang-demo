@@ -2,10 +2,27 @@
   import { stores } from '@sapper/app'
   
   const { session } = stores()
-  export let healthNote = { note: "" }
+  export let patient = { name: "Patrick", patientId: "patient1"}
+  export let healthNote
+  let note = ""
 
-  function onSave() {
-	}
+  async function onSave() {
+    var newNote = {
+      user_id: $session.profile.username,
+      patient_id: patient.patientId,
+      note: note
+    }
+    console.log(newNote)
+    await fetch('http://localhost:8000/api/v1/patient/note', {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newNote)
+    })
+  }
 </script>
 
 <style>
@@ -20,7 +37,8 @@
 {#if $session && $session.authenticated}
   <div>
   Add new note:<br/>
-  <textarea bind:value={healthNote.note}></textarea><br/>
+  patient : {patient.name} ({patient.patientId})<br/>
+  <textarea bind:value={note}></textarea><br/>
   by : {$session.profile.name} ({$session.profile.username})<br/>
   <button on:click={onSave}>save</button>
   </div>

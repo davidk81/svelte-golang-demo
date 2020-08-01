@@ -21,13 +21,13 @@
 <h1>Profile</h1>
 {#if $session && $session.authenticated}
   {#if profile}
-  <h2>Name</h2>
+  <h4>Name</h4>
   <ul>{profile.name}</ul>
 
-  <h2>Login ID</h2>
+  <h4>Login ID</h4>
   <ul>{profile.username}</ul>
 
-  <h2>Roles</h2>
+  <h4>Roles</h4>
   <ul>
     {#each profile.roles as role}
     <li>{role}</li>

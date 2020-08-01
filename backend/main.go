@@ -5,8 +5,12 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/davidk81/svelte-golang-demo/backend/patient"
+	"github.com/davidk81/svelte-golang-demo/backend/patientdb"
 	"github.com/davidk81/svelte-golang-demo/backend/session"
 	_ "github.com/lib/pq"
 	"github.com/valyala/fasthttp"
@@ -20,14 +24,31 @@ var (
 func main() {
 	flag.Parse()
 
+	// init db
+	patientdb.Init()
+
 	h := requestHandler
 	if *compress {
 		h = fasthttp.CompressHandler(h)
 	}
 
-	if err := fasthttp.ListenAndServe(*addr, h); err != nil {
-		log.Fatalf("Error in ListenAndServe: %s", err)
-	}
+	go func() {
+		log.Println("server starting on port", *addr)
+		if err := fasthttp.ListenAndServe(*addr, h); err != nil {
+			log.Fatalf("Error in ListenAndServe: %s", err)
+		}
+	}()
+
+	// cleanup
+	sigs := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		_ = <-sigs
+		done <- true
+	}()
+	<-done
+	patientdb.Close()
 }
 
 func requestHandler(ctx *fasthttp.RequestCtx) {
@@ -52,6 +73,8 @@ func requestHandler(ctx *fasthttp.RequestCtx) {
 		patient.HandlePatientList(ctx)
 	case "/api/v1/patient":
 		patient.HandlePatient(ctx)
+	case "/api/v1/patient/note":
+		patient.HandlePatientNote(ctx)
 	default:
 		ctx.Error("Unsupported path", fasthttp.StatusNotFound)
 	}

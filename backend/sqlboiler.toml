@@ -1,5 +1,5 @@
 pkgname="models"
-output="db/models"
+output="patientdb/models"
 schema="public"
 [psql]
     dbname = "patientdb"
@@ -9,5 +9,5 @@ schema="public"
     sslmode = "disable"
 
 [aliases.tables.patient_note.columns]
-patientid = "fkPatientId"
-userid = "fkUserId"
+patientid = "Patient_Id"
+userid = "User_Id"
