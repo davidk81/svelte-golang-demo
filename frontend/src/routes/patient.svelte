@@ -10,11 +10,14 @@
   let healthNotes;
   let error
 
-  let tokens = window.location.search.split("patientid=")
-  let patientid = tokens[tokens.length-1]
-  let newNote = { note: "",  patientid}
+  let patientid
+  let newNote
 
 	onMount(async () => {
+    let tokens = window.location.search.split("patientid=")
+    patientid = tokens[tokens.length-1]
+    newNote = { note: "",  patientid}
+
     const response = await fetch('http://localhost:8000/api/v1/patient?patientid=' + patientid, {
       method: 'GET',
       mode: 'cors',
@@ -54,7 +57,7 @@
 </script>
 
 <h1>Patient</h1>
-{#if $session && $session.authenticated}
+{#if $session && $session.authenticated && patient && newNote}
   {#if patient}
     <Patient patient={patient}/>
     {#if healthNotes}

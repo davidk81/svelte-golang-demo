@@ -114,15 +114,8 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 
 // validates session and returns user info in response body
 func handleMethodGet(ctx *fasthttp.RequestCtx) error {
-	// TODO: verify token & parse username
-	ValidateSession(ctx)
-
-	// fetch user
-	user, err := user.GetUser("username", ctx)
+	user, err := ValidateSession(ctx)
 	if err != nil {
-		return err
-	}
-	if user == nil {
 		ctx.SetStatusCode(fasthttp.StatusUnauthorized)
 		return nil
 	}
@@ -158,6 +151,9 @@ func ValidateSession(ctx *fasthttp.RequestCtx, roles ...string) (*user.UserWebRe
 	user, err := user.GetUserWebResponse(claims.Username, ctx)
 	if err != nil {
 		return nil, err
+	}
+	if len(roles) == 0 {
+		return user, nil
 	}
 	for _, requiredRole := range roles {
 		for _, myRole := range user.Roles {

@@ -1,8 +1,43 @@
 <script>
-  	import { stores } from '@sapper/app'
-  
-  	const { session } = stores()
-	export let segment;
+  import { onMount } from 'svelte';
+  import { stores } from '@sapper/app'
+
+  const { session } = stores()
+	export let segment
+
+  onMount(async () => {
+    if (session && session.authenticated) return;
+    session.update(() => {
+      return { loading: true }
+    });
+    const response = await fetch('http://localhost:8000/api/v1/session', {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    if (response.ok) {
+      let profile = await response.json()
+      session.update(() => {
+        return {
+          authenticated: !!profile,
+          profile,
+          loading: false
+        }
+      });
+    }
+    else {
+      session.update(() => {
+        return {
+          authenticated: false,
+          profile: null,
+          loading: false
+        }
+      });      
+    }
+  });
 </script>
 
 <style>

@@ -47,15 +47,17 @@
 	<title>Patient Management System</title>
 </svelte:head>
 
-{#if $session && $session.authenticated}
-  <p>Welcome, {$session.profile.name}</p>
-{:else}
-  <form>
-  <p>Nurse Login</p>
-  {#if error}
-  <div>login error!</div>
+{#if $session && !$session.loading}
+  {#if $session.authenticated}
+    <p>Welcome, {$session.profile.name}</p>
+  {:else}
+    <form>
+    <p>Nurse Login</p>
+    {#if error}
+    <div>login error!</div>
+    {/if}
+    <input bind:value={username}/>
+    <button type="button" disabled={!username} on:click={login}>login</button>
+    </form>
   {/if}
-  <input bind:value={username}/>
-  <button type="button" disabled={!username} on:click={login}>login</button>
-  </form>
 {/if}
