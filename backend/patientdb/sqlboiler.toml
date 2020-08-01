@@ -1,5 +1,5 @@
 pkgname="models"
-output="patientdb/models"
+output="models"
 schema="public"
 [psql]
     dbname = "patientdb"

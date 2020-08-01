@@ -1,5 +1,8 @@
 package patientdb
 
+// line below enables 'go generate' cmd to update orm stubs
+//go:generate sqlboiler --wipe psql
+
 import (
 	"database/sql"
 )
@@ -7,8 +10,8 @@ import (
 var sharedb *sql.DB
 
 // Init initialize database connection
-func Init() {
-	db, err := sql.Open("postgres", "host=localhost dbname=patientdb user=docker password=docker sslmode=disable")
+func Init(dbConn string) {
+	db, err := sql.Open("postgres", dbConn)
 	if err != nil {
 		panic(err)
 	}

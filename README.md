@@ -113,8 +113,17 @@ frontend can be instrucmented with services such as Google Analytics. backend go
 todo:
 - client session no persisting propery across refresh
 
-## running locally
+## build & running locally
 
 ```sh
-docker run -d --name postgres-patients -v my_dbdata:/var/lib/postgresql/data -p 54320:5432 postgres:11
+# untag image & trigger rebuild
+docker rmi svelte-golang-demo_backend
+
+# start
+docker-compose up
+
+# surf
+
+# stop
+docker-compose down
 ```

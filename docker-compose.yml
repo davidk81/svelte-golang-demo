@@ -1,0 +1,33 @@
+version: "3.3"
+
+services:
+  db:
+    image: postgres:11
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+      - PGDATA=/pgdata
+      - POSTGRES_DB=patientdb
+
+  seed-db:
+    image: migrate/migrate:v4.12.1
+    volumes:
+      - ./db-schema/migrations:/migrations
+    entrypoint: /bin/sh -c 'sleep 2 && migrate -path=/migrations/ -database "postgres://docker:docker@db:5432/patientdb?sslmode=disable" up'
+    depends_on:
+      - "db"
+      
+  backend:
+    build: backend
+    ports:
+      - 8000:8000
+    entrypoint: './main -addr "0.0.0.0:8000" -db "host=db dbname=patientdb user=docker password=docker sslmode=disable"'
+    depends_on:
+      - "db"
+
+  frontend:
+    build: frontend
+    ports:
+      - 5000:80

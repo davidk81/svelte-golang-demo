@@ -1,8 +1,5 @@
 package main
 
-// line below enables 'go generate' cmd to update orm stubs
-//go:generate sqlboiler --wipe psql
-
 import (
 	"flag"
 	"fmt"
@@ -19,6 +16,7 @@ import (
 )
 
 var (
+	dbConn   = flag.String("db", "host=localhost dbname=patientdb user=docker password=docker sslmode=disable", "db connection string")
 	addr     = flag.String("addr", "localhost:8000", "tcp listen address & port")
 	compress = flag.Bool("compress", false, "response compression [true/false]")
 )
@@ -27,7 +25,7 @@ func main() {
 	flag.Parse()
 
 	// init db connection
-	patientdb.Init()
+	patientdb.Init(*dbConn)
 
 	h := requestHandler
 	if *compress {

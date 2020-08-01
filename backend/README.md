@@ -18,7 +18,13 @@ go get -u -v github.com/volatiletech/sqlboiler/drivers/sqlboiler-psql
 brew install libpq
 
 # update db orm from schema
-go generate
+(cd ./patientdb && go generate)
+
+# build app as docker image
+docker build . -t patient-backend
+
+# run app as docker image
+docker run --rm -it -p 8000:8000 patient-backend
 ```
 
 # todo
