@@ -5,15 +5,16 @@
   export let patient = { name: "Patrick", patientId: "patient1"}
   export let healthNote
   let note = ""
+  let error
 
   async function onSave() {
     var newNote = {
-      user_id: $session.profile.username,
-      patient_id: patient.patientId,
+      userid: $session.profile.username,
+      patientid: patient.patientId,
       note: note
     }
     console.log(newNote)
-    await fetch('http://localhost:8000/api/v1/patient/note', {
+    const res = await fetch('http://localhost:8000/api/v1/patient/note', {
       method: 'POST',
       mode: 'cors',
       credentials: 'include',
@@ -22,6 +23,12 @@
       },
       body: JSON.stringify(newNote)
     })
+    if (res.ok) {
+      error = null
+    }
+    else {
+      error = await res.text()
+    }
   }
 </script>
 
@@ -42,4 +49,7 @@
   by : {$session.profile.name} ({$session.profile.username})<br/>
   <button on:click={onSave}>save</button>
   </div>
+  {#if error}
+  {error}
+  {/if}
 {/if}

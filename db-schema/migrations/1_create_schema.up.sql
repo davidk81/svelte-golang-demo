@@ -15,8 +15,8 @@ CREATE TABLE "user" (
 
 CREATE TABLE "patient_note" (
   noteid char(64) primary key,
-  patientid varchar(100) references "patient"(patientid),
-  userid varchar(100) references "user"(userid),
-  note varchar(4096),
+  patientid varchar(100) not null references "patient"(patientid),
+  userid varchar(100) not null references "user"(userid),
+  note varchar(4096) not null,
   created timestamp with time zone default now()
 );

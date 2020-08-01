@@ -4,6 +4,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -51,6 +52,33 @@ func main() {
 	patientdb.Close()
 }
 
+func route(ctx *fasthttp.RequestCtx) error {
+	// route that dont need session
+	switch string(ctx.Path()) {
+	case "/api/v1/session":
+		return session.HandleSession(ctx)
+	case "/api/v1/patients":
+		return patient.HandlePatientList(ctx)
+	case "/api/v1/patient":
+		return patient.HandlePatient(ctx)
+	case "/api/v1/patient/note":
+		return patient.HandlePatientNote(ctx)
+	case "/api/v1/patient/notes":
+		return patient.HandlePatientNoteList(ctx)
+	}
+
+	// routes that need session
+	if !session.VerifySession(ctx, "nurse") {
+		ctx.Response.SetStatusCode(fasthttp.StatusUnauthorized)
+	}
+
+	switch string(ctx.Path()) {
+	default:
+		ctx.NotFound()
+		return nil
+	}
+}
+
 func requestHandler(ctx *fasthttp.RequestCtx) {
 	log.Printf("%s %s\n", ctx.Request.Header.Method(), ctx.Path())
 
@@ -66,21 +94,13 @@ func requestHandler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	switch string(ctx.Path()) {
-	case "/api/v1/session":
-		session.HandleSession(ctx)
-	case "/api/v1/patients":
-		patient.HandlePatientList(ctx)
-	case "/api/v1/patient":
-		patient.HandlePatient(ctx)
-	case "/api/v1/patient/note":
-		patient.HandlePatientNote(ctx)
-	default:
-		ctx.Error("Unsupported path", fasthttp.StatusNotFound)
+	err := route(ctx)
+	if err != nil {
+		fmt.Println(err)
+		ctx.SetBody([]byte(err.Error()))
+		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
+		return
 	}
-
-	session.VerifySession(ctx, "nurse")
-
 }
 
 func handleMethodOptions(ctx *fasthttp.RequestCtx) {

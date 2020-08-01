@@ -3,7 +3,6 @@ package session
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
@@ -31,42 +30,44 @@ type Claims struct {
 }
 
 // HandleSession entrypoint http request handler
-func HandleSession(ctx *fasthttp.RequestCtx) {
+func HandleSession(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Request.Header.Method()) {
 	case "POST":
-		handleMethodPost(ctx)
+		return handleMethodPost(ctx)
 	case "GET":
-		handleMethodGet(ctx)
+		return handleMethodGet(ctx)
 	case "DELETE":
-		handleMethodDelete(ctx)
+		return handleMethodDelete(ctx)
 	default:
-		ctx.Error("Unsupported path", fasthttp.StatusNotFound)
+		ctx.NotFound()
+		return nil
 	}
 }
 
-func handleMethodDelete(ctx *fasthttp.RequestCtx) {
+func handleMethodDelete(ctx *fasthttp.RequestCtx) error {
 	var c fasthttp.Cookie
 	c.SetKey(sessionToken)
 	c.SetValue("")
 	c.SetExpire(time.Now())
 	ctx.Response.Header.SetCookie(&c)
 	ctx.SetStatusCode(fasthttp.StatusOK)
+	return nil
 }
 
-func handleMethodPost(ctx *fasthttp.RequestCtx) {
+func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 	// decode login credentials from body
 	var creds Credentials
 	err := json.Unmarshal(ctx.Request.Body(), &creds)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
-		return
+		return nil
 	}
 
 	// check password
 	user := user.Login(creds.Username, creds.Password)
 	if user == nil {
 		ctx.SetStatusCode(fasthttp.StatusUnauthorized)
-		return
+		return nil
 	}
 
 	// create jwt token
@@ -82,8 +83,7 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
-		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-		return
+		return err
 	}
 
 	// update cookie
@@ -96,14 +96,14 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) {
 	// return user info in response, such as roles
 	b, err := json.Marshal(user)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	ctx.SetBody([]byte(b))
 	ctx.SetStatusCode(fasthttp.StatusCreated)
+	return nil
 }
 
-func handleMethodGet(ctx *fasthttp.RequestCtx) {
+func handleMethodGet(ctx *fasthttp.RequestCtx) error {
 	// TODO: verify token & parse username
 	VerifySession(ctx)
 	log.Println(ctx.Request.Header.Cookie(sessionToken))
@@ -112,17 +112,17 @@ func handleMethodGet(ctx *fasthttp.RequestCtx) {
 	user := user.GetUser("username")
 	if user == nil {
 		ctx.SetStatusCode(fasthttp.StatusUnauthorized)
-		return
+		return nil
 	}
 
 	// return user info in response, such as roles
 	b, err := json.Marshal(user)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	ctx.SetBody([]byte(b))
 	ctx.SetStatusCode(fasthttp.StatusOK)
+	return nil
 }
 
 // VerifySession and check user has atleast one of the roles

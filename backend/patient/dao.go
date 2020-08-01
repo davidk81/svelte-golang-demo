@@ -13,7 +13,7 @@ import (
 
 // GetPatients (list)
 func GetPatients(ctx *fasthttp.RequestCtx) (models.PatientSlice, error) {
-	return models.Patients(qm.Limit(5)).All(ctx, patientdb.DB())
+	return models.Patients(qm.Limit(20)).All(ctx, patientdb.DB())
 }
 
 // AddPatientNote adds a new note to the patient

@@ -6,3 +6,10 @@ INSERT INTO "patient" (patientid, name, location)
 
 INSERT INTO "patient" (patientid, name, location) 
     VALUES ('patient3', 'paul', 'room103');
+
+INSERT INTO "user" (userid, name) 
+    VALUES ('nurse1', 'nancy');
+
+INSERT INTO "user" (userid, name) 
+    VALUES ('nurse2', 'nate');
+

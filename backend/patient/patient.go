@@ -2,7 +2,6 @@ package patient
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/davidk81/svelte-golang-demo/backend/session"
 	"github.com/valyala/fasthttp"
@@ -15,40 +14,44 @@ type Patient struct {
 }
 
 // HandlePatient entrypoint http request handler
-func HandlePatient(ctx *fasthttp.RequestCtx) {
+func HandlePatient(ctx *fasthttp.RequestCtx) error {
 	session.VerifySession(ctx, "nurse")
 	switch string(ctx.Request.Header.Method()) {
 	case "POST":
-		handleMethodPost(ctx)
+		return handleMethodPost(ctx)
 	case "DELETE":
-		handleMethodDelete(ctx)
+		return handleMethodDelete(ctx)
 	default:
-		ctx.Error("Unsupported path", fasthttp.StatusNotFound)
+		ctx.NotFound()
+		return nil
 	}
 }
 
 // HandlePatientList entrypoint http request handler
-func HandlePatientList(ctx *fasthttp.RequestCtx) {
+func HandlePatientList(ctx *fasthttp.RequestCtx) error {
 	session.VerifySession(ctx, "nurse")
 	switch string(ctx.Request.Header.Method()) {
 	case "GET":
-		handleMethodGetList(ctx)
+		return handleMethodGetList(ctx)
 	default:
-		ctx.Error("Unsupported path", fasthttp.StatusNotFound)
+		ctx.NotFound()
+		return nil
 	}
 }
 
-func handleMethodDelete(ctx *fasthttp.RequestCtx) {
+func handleMethodDelete(ctx *fasthttp.RequestCtx) error {
+	// TODO
 	ctx.SetStatusCode(fasthttp.StatusOK)
+	return nil
 }
 
-func handleMethodPost(ctx *fasthttp.RequestCtx) {
+func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 	// decode post body
 	var patient Patient
 	err := json.Unmarshal(ctx.Request.Body(), &patient)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
-		return
+		return nil
 	}
 
 	// TODO: validate data
@@ -57,25 +60,24 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) {
 	// return patient info in response
 	b, err := json.Marshal(patient)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	ctx.SetBody([]byte(b))
 	ctx.SetStatusCode(fasthttp.StatusCreated)
+	return nil
 }
 
-func handleMethodGetList(ctx *fasthttp.RequestCtx) {
+func handleMethodGetList(ctx *fasthttp.RequestCtx) error {
 	// return patient info in response
 	p, err := GetPatients(ctx)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	b, err := json.Marshal(p)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	ctx.SetBody([]byte(b))
 	ctx.SetStatusCode(fasthttp.StatusCreated)
+	return nil
 }
