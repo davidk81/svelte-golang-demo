@@ -3,12 +3,17 @@
   
   const { session } = stores()
   export let patient
-  export let healthNote
   export let onUpdated
   let note = ""
   let error
+  let loading = false
 
   async function onSave() {
+    loading = true
+    if (note.length == 0) {
+      error = "health note must not be empty"
+      return
+    }
     var newNote = {
       userid: $session.profile.username,
       patientid: patient.patientid,
@@ -31,6 +36,7 @@
     else {
       error = await response.text()
     }
+    loading = false
   }
 </script>
 
@@ -49,7 +55,7 @@
   patient : {patient.name} ({patient.patientid})<br/>
   <textarea bind:value={note}></textarea><br/>
   by : {$session.profile.name} ({$session.profile.username})<br/>
-  <button on:click={onSave}>save</button>
+  <button disabled={loading} on:click={onSave}>save</button>
   </div>
 {/if}
 {#if error}

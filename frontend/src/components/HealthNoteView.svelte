@@ -24,7 +24,7 @@
       <td>{healthNote.note}</td>
     </tr>
     <tr>
-      <td>Nurse:</td>
+      <td>Nurse ID:</td>
       <td>{healthNote.userid}</td>
     </tr>
     <tr>

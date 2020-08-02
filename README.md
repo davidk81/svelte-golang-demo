@@ -123,18 +123,15 @@ frontend can be instrumented with services such as Google Analytics. backend goL
 - backend instrumentation (eg. prometheus, opentracing)
 - integration tests
 - code lint in ci/cd
+- look into more secure authentication services/products & practices
 
 ## build & run compiled pages locally
 
 to run frontend in developer mode, see [frontend/README.md](frontend/README.md)
 
 ```sh
-# untag image & trigger rebuild
-docker rmi svelte-golang-demo_backend
-docker rmi svelte-golang-demo_frontend
-
-# start
-docker-compose up
+# (re)build images & start
+docker-compose up --build
 
 # surf http://localhost:5000/
 
