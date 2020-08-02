@@ -32,7 +32,7 @@ data is persisted by backend using postgres sql
 
 #### services & data modelling
 
-also refer to (api/README.md)[api/README.md] for sample request/response
+also refer to [api/README.md](api/README.md) for sample request/response
 
 - auth service
 	- /api/v1/session
