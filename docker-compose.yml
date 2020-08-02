@@ -15,7 +15,7 @@ services:
     image: migrate/migrate:v4.12.1
     volumes:
       - ./db-schema/migrations:/migrations
-    entrypoint: /bin/sh -c 'sleep 2 && migrate -path=/migrations/ -database "postgres://docker:docker@db:5432/patientdb?sslmode=disable" up'
+    entrypoint: /bin/sh -c 'sleep 5 && migrate -path=/migrations/ -database "postgres://docker:docker@db:5432/patientdb?sslmode=disable" up'
     depends_on:
       - "db"
       

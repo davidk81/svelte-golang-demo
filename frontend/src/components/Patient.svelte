@@ -19,9 +19,13 @@
     margin: 5px;
     padding: 5px;
   }
+  .active {
+		background-color: #ff3e00;
+		color: white;
+	}
 </style>
 
-<div on:click={onClick}>
+<div on:click={onClick} let:hovering={active}>
   <table>
     <tr>
       <td>Name:</td>

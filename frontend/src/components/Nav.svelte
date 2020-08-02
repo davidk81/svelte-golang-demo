@@ -5,37 +5,46 @@
   const { session } = stores()
 	export let segment
 
+  // check for valid session on page load
   onMount(async () => {
-    if (session && session.authenticated) return;
+    if (session && session.authenticated) return; // already have valid session
     session.update(() => {
       return { loading: true }
     });
-    const response = await fetch('http://localhost:8000/api/v1/session', {
-      method: 'GET',
-      mode: 'cors',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
+    try {
+      // validate session-token against server
+      const response = await fetch('http://localhost:8000/api/v1/session', {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      if (response.ok) {
+        // user profile is returned on success
+        let profile = await response.json()
+        session.update(() => {
+          return {
+            authenticated: !!profile,
+            profile,
+            loading: false
+          }
+        });
       }
-    })
-    if (response.ok) {
-      let profile = await response.json()
-      session.update(() => {
-        return {
-          authenticated: !!profile,
-          profile,
-          loading: false
-        }
-      });
+      else {
+        // error validating session
+        session.update(() => {
+          return {
+            authenticated: false,
+            profile: null,
+            loading: false
+          }
+        });      
+      }      
     }
-    else {
-      session.update(() => {
-        return {
-          authenticated: false,
-          profile: null,
-          loading: false
-        }
-      });      
+    catch (err) {
+      console.log(err) // connectio error
     }
   });
 </script>

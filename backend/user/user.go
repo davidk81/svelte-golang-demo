@@ -6,14 +6,16 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/davidk81/svelte-golang-demo/backend/patientdb/models"
 	"github.com/valyala/fasthttp"
 	"golang.org/x/crypto/bcrypt"
 )
 
-// UserWebResponse for responding to api request
-type UserWebResponse struct {
+// WebUserObject for responding to api request
+type WebUserObject struct {
 	Name     string   `json:"name"`
 	Username string   `json:"username"`
+	Password string   `json:"password"`
 	Roles    []string `json:"roles"`
 }
 
@@ -31,28 +33,32 @@ func HandleUser(ctx *fasthttp.RequestCtx) error {
 }
 
 // Login checks username & password, and returns User data if successful
-func Login(username, password string, ctx *fasthttp.RequestCtx) (*UserWebResponse, error) {
-	// TODO: check password
+func Login(username, password string, ctx *fasthttp.RequestCtx) (*WebUserObject, error) {
 	user, err := GetUser(username, ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return &UserWebResponse{
+	err = verifyPassword(user.Secret, []byte(password))
+	if err != nil {
+		return nil, err
+	}
+
+	return &WebUserObject{
 		Name:     user.Name,
 		Username: user.Userid,
 		Roles:    strings.Split(user.Roles, ","),
 	}, nil
 }
 
-// GetUserWebResponse for retrieving an already validated session
-func GetUserWebResponse(username string, ctx *fasthttp.RequestCtx) (*UserWebResponse, error) {
+// GetWebUserObject for retrieving an already validated session
+func GetWebUserObject(username string, ctx *fasthttp.RequestCtx) (*WebUserObject, error) {
 	user, err := GetUser(username, ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return &UserWebResponse{
+	return &WebUserObject{
 		Name:     user.Name,
 		Username: user.Userid,
 		Roles:    strings.Split(user.Roles, ","),
@@ -67,7 +73,7 @@ func handleMethodDelete(ctx *fasthttp.RequestCtx) error {
 
 func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 	// decode post body
-	var user UserWebResponse
+	var user WebUserObject
 	err := json.Unmarshal(ctx.Request.Body(), &user)
 	if err != nil {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
@@ -82,6 +88,27 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 	ctx.SetBody([]byte(b))
 	// ctx.SetStatusCode(fasthttp.StatusCreated)
 	ctx.SetStatusCode(fasthttp.StatusNotImplemented)
+	return nil
+}
+
+// Register new user
+func Register(user *WebUserObject, ctx *fasthttp.RequestCtx) error {
+	hashedPassword, err := hashAndSaltPassword([]byte(user.Password))
+	if err != nil {
+		return err
+	}
+
+	userdao := &models.User{
+		Userid: user.Username,
+		Name:   user.Name,
+		Roles:  strings.Join(user.Roles, ","),
+		Secret: hashedPassword,
+	}
+	err = CreateUser(userdao, ctx)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

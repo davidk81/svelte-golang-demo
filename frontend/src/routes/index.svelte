@@ -1,63 +1,34 @@
 <script>
   import { goto, stores } from '@sapper/app'
+  import Login from '../components/Login.svelte'
   
   const { session } = stores()
-  let username = 'nurse1'
-  let password = 'password'
-  let error = false
+  let error
 
-  async function login () {
-    const response = await fetch('http://localhost:8000/api/v1/session', {
-      method: 'POST',
-      mode: 'cors',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username,
-        password
-      })
-    })
-    if (response.ok) {
-      const profile = await response.json();
-      session.update(() => {
-                    return {
-                        authenticated: !!profile,
-                        profile
-                    }
-                });
-      error = !!profile
-      if (profile.roles.includes('nurse'))
-        goto('patients')
-    } else {
-      session.update(() => {
-                    return {
-                        authenticated: false,
-                        profile : null
-                    }
-                });
-      console.log(response);
-      error = true;
-    }
-  }
 </script>
+
+<style>
+  .center {
+    margin: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+</style>
 
 <svelte:head>
 	<title>Patient Management System</title>
 </svelte:head>
 
+<div class=center>
 {#if $session && !$session.loading}
   {#if $session.authenticated}
     <p>Welcome, {$session.profile.name}</p>
   {:else}
-    <form>
-    <p>Nurse Login</p>
-    {#if error}
-    <div>login error!</div>
-    {/if}
-    <input bind:value={username}/>
-    <button type="button" disabled={!username} on:click={login}>login</button>
-    </form>
+    <Login/>
   {/if}
 {/if}
+{#if error}
+  {error}
+{/if}
+</div>

@@ -64,6 +64,8 @@ func route(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Path()) {
 	case "/api/v1/session":
 		return session.HandleSession(ctx)
+	case "/api/v1/register":
+		return session.HandleRegister(ctx)
 	case "/healthz":
 		return handleHealth(ctx)
 	}

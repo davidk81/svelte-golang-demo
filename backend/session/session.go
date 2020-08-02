@@ -32,7 +32,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-// HandleSession entrypoint http request handler
+// HandleSession entrypoint http request handler for /session
 func HandleSession(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Request.Header.Method()) {
 	case "POST":
@@ -41,6 +41,17 @@ func HandleSession(ctx *fasthttp.RequestCtx) error {
 		return handleMethodGet(ctx)
 	case "DELETE":
 		return handleMethodDelete(ctx)
+	default:
+		ctx.NotFound()
+		return nil
+	}
+}
+
+// HandleSession entrypoint http request handler for /register
+func HandleRegister(ctx *fasthttp.RequestCtx) error {
+	switch string(ctx.Request.Header.Method()) {
+	case "POST":
+		return handleRegisterUser(ctx)
 	default:
 		ctx.NotFound()
 		return nil
@@ -131,7 +142,7 @@ func handleMethodGet(ctx *fasthttp.RequestCtx) error {
 }
 
 // ValidateSession and check user has atleast one of the roles
-func ValidateSession(ctx *fasthttp.RequestCtx, roles ...string) (*user.UserWebResponse, error) {
+func ValidateSession(ctx *fasthttp.RequestCtx, roles ...string) (*user.WebUserObject, error) {
 	token, err := verifyToken(ctx)
 	if err != nil {
 		return nil, err
@@ -148,7 +159,7 @@ func ValidateSession(ctx *fasthttp.RequestCtx, roles ...string) (*user.UserWebRe
 	if claims.ExpiresAt < time.Now().Unix() {
 		return nil, errors.New("session expired")
 	}
-	user, err := user.GetUserWebResponse(claims.Username, ctx)
+	user, err := user.GetWebUserObject(claims.Username, ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -178,4 +189,55 @@ func verifyToken(ctx *fasthttp.RequestCtx) (*jwt.Token, error) {
 		return nil, err
 	}
 	return token, nil
+}
+
+// authenticates user by checking credentials, and sets session token
+// if success, responds with user details in post body
+func handleRegisterUser(ctx *fasthttp.RequestCtx) error {
+	// decode login credentials from body
+	var newuser user.WebUserObject
+	err := json.Unmarshal(ctx.Request.Body(), &newuser)
+	if err != nil {
+		ctx.SetStatusCode(fasthttp.StatusBadRequest)
+		return nil
+	}
+
+	// check password
+	err = user.Register(&newuser, ctx)
+	if err != nil {
+		return err
+	}
+
+	// create jwt token
+	expirationTime := time.Now().Add(60 * time.Minute)
+	claims := &Claims{
+		Username: newuser.Username,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	// sign token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		return err
+	}
+
+	// update cookie
+	var c fasthttp.Cookie
+	c.SetKey(sessionToken)
+	c.SetValue(tokenString)
+	c.SetExpire(expirationTime)
+	ctx.Response.Header.SetCookie(&c)
+
+	// return user info in response, such as roles
+	newuser.Password = "" // sanitize
+	b, err := json.Marshal(newuser)
+	if err != nil {
+		return err
+	}
+	ctx.SetBody([]byte(b))
+	ctx.SetStatusCode(fasthttp.StatusCreated)
+	return nil
 }

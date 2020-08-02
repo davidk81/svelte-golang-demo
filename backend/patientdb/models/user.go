@@ -24,11 +24,11 @@ import (
 
 // User is an object representing the database table.
 type User struct {
-	Userid  string      `boil:"userid" json:"userid" toml:"userid" yaml:"userid"`
-	Name    string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Roles   string      `boil:"roles" json:"roles" toml:"roles" yaml:"roles"`
-	Secret  null.String `boil:"secret" json:"secret,omitempty" toml:"secret" yaml:"secret,omitempty"`
-	Created null.Time   `boil:"created" json:"created,omitempty" toml:"created" yaml:"created,omitempty"`
+	Userid  string    `boil:"userid" json:"userid" toml:"userid" yaml:"userid"`
+	Name    string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Roles   string    `boil:"roles" json:"roles" toml:"roles" yaml:"roles"`
+	Secret  string    `boil:"secret" json:"secret" toml:"secret" yaml:"secret"`
+	Created null.Time `boil:"created" json:"created,omitempty" toml:"created" yaml:"created,omitempty"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -50,40 +50,17 @@ var UserColumns = struct {
 
 // Generated where
 
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var UserWhere = struct {
 	Userid  whereHelperstring
 	Name    whereHelperstring
 	Roles   whereHelperstring
-	Secret  whereHelpernull_String
+	Secret  whereHelperstring
 	Created whereHelpernull_Time
 }{
 	Userid:  whereHelperstring{field: "\"user\".\"userid\""},
 	Name:    whereHelperstring{field: "\"user\".\"name\""},
 	Roles:   whereHelperstring{field: "\"user\".\"roles\""},
-	Secret:  whereHelpernull_String{field: "\"user\".\"secret\""},
+	Secret:  whereHelperstring{field: "\"user\".\"secret\""},
 	Created: whereHelpernull_Time{field: "\"user\".\"created\""},
 }
 
