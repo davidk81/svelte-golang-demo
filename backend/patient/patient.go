@@ -65,7 +65,7 @@ func handleMethodPost(ctx *fasthttp.RequestCtx) error {
 }
 
 func handleMethodGetList(ctx *fasthttp.RequestCtx) error {
-	p, err := GetPatients(ctx)
+	p, err := getPatients(ctx)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func handleMethodGet(ctx *fasthttp.RequestCtx) error {
 	patientID := string(ctx.QueryArgs().Peek("patientid"))
 
 	// return patient info in response
-	p, err := GetPatient(patientID, ctx)
+	p, err := getPatient(patientID, ctx)
 	if err != nil {
 		return err
 	}

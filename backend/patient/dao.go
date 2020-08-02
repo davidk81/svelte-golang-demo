@@ -11,23 +11,24 @@ import (
 	"github.com/volatiletech/sqlboiler/queries/qm"
 )
 
-// GetPatients (list)
-func GetPatients(ctx *fasthttp.RequestCtx) (models.PatientSlice, error) {
+// getPatients (list)
+func getPatients(ctx *fasthttp.RequestCtx) (models.PatientSlice, error) {
 	return models.Patients(qm.Limit(20)).All(ctx, patientdb.DB())
 }
 
-// GetPatient
-func GetPatient(patientID string, ctx *fasthttp.RequestCtx) (*models.Patient, error) {
+// getPatient returns patient with matching patientID
+func getPatient(patientID string, ctx *fasthttp.RequestCtx) (*models.Patient, error) {
 	return models.Patients(models.PatientWhere.Patientid.EQ(patientID)).One(ctx, patientdb.DB())
 }
 
-// GetPatientNotes (list)
-func GetPatientNotes(patientID string, ctx *fasthttp.RequestCtx) (models.PatientNoteSlice, error) {
+// getPatientNotes (list)
+func getPatientNotes(patientID string, ctx *fasthttp.RequestCtx) (models.PatientNoteSlice, error) {
+	// TODO: add orderby clause
 	return models.PatientNotes(models.PatientNoteWhere.Patient_Id.EQ(patientID)).All(ctx, patientdb.DB())
 }
 
-// AddPatientNote adds a new note to the patient
-func AddPatientNote(note *models.PatientNote, ctx *fasthttp.RequestCtx) error {
+// addPatientNote adds a new note to the patient
+func addPatientNote(note *models.PatientNote, ctx *fasthttp.RequestCtx) error {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return err
