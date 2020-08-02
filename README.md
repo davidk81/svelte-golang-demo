@@ -116,6 +116,7 @@ frontend can be instrumented with services such as Google Analytics. backend goL
 
 ## future work
 
+- check licensing
 - openapi/swagger definition & stub generation
 - frontend unit tests
 - frontend instrumentation (eg. Google Analytics)
