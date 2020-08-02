@@ -4,11 +4,13 @@ A demo app using Svelte as frontend and GoLang as backend. This app provides an 
 
 ## site map
 
-- home (login, logout)
+- home (login, logout, register)
 - patients list view (accessible by nurses & admin, can add/edit patient)
 	- patient view (list of notes, nurses can add new notes and edit existing)
-- admin (add/edit users: admin & nurses)
-- profile (view/modify personal details for logged-in user)
+- * admin (add/edit users: admin & nurses)
+- * profile (view/modify personal details for logged-in user)
+
+* not implemented 
 
 ## application design
 
@@ -22,61 +24,65 @@ internationalization possibiles will not be address; if needed, it should be pos
 
 #### backend
 
-for the sake of keeping this demo simple during developemnt, a single goLang backend service is used to authenticate and serve all api requests. the backend will be used to authenticate client session by providing JWT tokens; it should also be easy to use a 3rd party authentication provider instead. 
+for the sake of keeping this demo simple during development, a single goLang backend service is used to authenticate and serve all api requests. the backend will be used to authenticate client session by providing JWT tokens; it should also be easy to use a 3rd party authentication provider instead. 
 
-if/when the need arises to separate the backend into individual microserves, the api structure is designed to make this process relatively simple. some code refactoring may need to be done, for example, the client JWT token validation may be refactored to make a
+if/when the need arises to separate the backend into individual microserves, the backend folder structure is designed to make this process relatively simple. some code refactoring may need to be done, for example, the session service may be updated to call user service endpoint instead of accessing it directly
 
-data is persisted by backend using sql interface. any popular sql backend such my mysql or postgres may be used.
+data is persisted by backend using postgres sql
 
 #### services & data modelling
 
 - auth service
 	- /api/v1/session
 		- POST/DELETE (login, logout)
+	- /api/v1/regiser
+		- POST (register new userz)
 
 - user service
 	- /api/v1/users
 		- GET
 	- /api/v1/user?user-id=
-		- POST/GET/DELETE
+		- POST/GET/DELETE (not implemented)
 
-	- dao nurse
-		- username (login id)
+	- dao user
+		- userid (login id)
 		- name (full name)
-		- enabled
-		- last-login
+		- secret (salted hashed password)
+		- last-login (not implemented)
 		- created-time
-		- last-modified
+		- last-modified (not implemented)
 
 - patient service		
 	- /api/v1/patients
-		- GET
+		- GET (list)
 	- /api/v1/patient?patient-id=
-		- POST/GET/DELETE
+		- POST/GET/DELETE (single)
 	- /api/v1/patient-notes?patient-id=
-		- GET
+		- GET (list)
 	- /api/v1/patient-note?note-id=
-		- POST/GET/DELETE
+		- POST (new health note)
+		- GET/DELETE (not implemented)
 
 	- dao patient
+		- patientid
 		- name (full name)
 		- location (facility-id, bed-id, room-id, etc)
 		- created-time
-		- last-modified
+		- last-modified (not implemented)
 	- dao patient-note
-		- note-id
-		- nurse-id
-		- patient-id
+		- noteid (uuid)
+		- userid (fk)
+		- patientid (fk)
 		- note (text)
 		- created-time
-		- last-modified
+		- last-modified (not implemented)
 
 ## repository folder structure
 
 - project root
-	- api (folder)
+	- api (folder) -  (not implemented)
 		- api definition
-		- stub generation scripts
+		- swagger/openapi stub generation scripts
 	- frontend (folder)
 		- src code, svelte
 		- Dockerfiles for dev & testing
@@ -88,17 +94,17 @@ data is persisted by backend using sql interface. any popular sql backend such m
 		- pre-seeded data for dev/testing
 		- db schema migration scripts (https://github.com/golang-migrate/migrate)
 		- db orm generator (sqlboiler, https://github.com/lqs/sqlingo)
-	- integration-tests (folder)
+	- integration-tests (folder) (not implemented)
 		- synthetic testing (eg. selenium)
 		- Docker-compose files for dev & testing
-	- cicd (folder)
+	- cicd (folder) (not implemented)
 		- Dockerfiles for ci/cd & production services
 		- cloud deployment manifests (k8s, terraform, etc)
 		- ci/cd bash scripts
 
 ## ci/cd considerations
 
-code lint, unit testing, gui testing in ci/cd. Dockerfiles provided to facilitate build, test, and service execution environments.
+(not implemented) code lint, unit testing, gui testing in ci/cd. Dockerfiles provided to facilitate build, test, and service execution environments.
 
 ## sample deployment architecture
 
@@ -106,14 +112,21 @@ frontend website can deployed as static website; CDN may be utilized. Backend se
 
 ## service monitoring consideration
 
-frontend can be instrucmented with services such as Google Analytics. backend goLang services can be instrumented for Prometheus using official [go client](https://github.com/prometheus/client_golang), and for OpenTracing using [OpenTracing API for Go](https://github.com/opentracing/opentracing-go)
+frontend can be instrumented with services such as Google Analytics. backend goLang services can be instrumented for Prometheus using official [go client](https://github.com/prometheus/client_golang), and for OpenTracing using [OpenTracing API for Go](https://github.com/opentracing/opentracing-go)
 
-## work in progress
+## future work
 
-todo:
-- client session no persisting propery across refresh
+- openapi/swagger definition & stub generation
+- frontend unit tests
+- frontend instrumentation (eg. Google Analytics)
+- backend unit tests
+- backend instrumentation (eg. prometheus, opentracing)
+- integration tests
+- code lint in ci/cd
 
-## build & running locally
+## build & run compiled pages locally
+
+to run frontend in developer mode, see [frontend/README.md](frontend/README.md)
 
 ```sh
 # untag image & trigger rebuild

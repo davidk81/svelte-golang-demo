@@ -8,6 +8,13 @@
     padding: 5px;
     margin: 5px;
   }
+  table {
+    width: 100%;
+  }
+  td {
+    white-space: pre-wrap;
+    vertical-align: text-top;
+  }
 </style>
 
 <div>
