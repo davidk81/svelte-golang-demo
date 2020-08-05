@@ -20,18 +20,6 @@ const sessionToken = "session-token"
 // TODO: use a secure key mounted during deployment
 var jwtKey = []byte("ja93jalkdf092jlkadfh02h3lkdfiu0293lakndf0923haf93ja1h")
 
-// Credentials struct for demarshalling session post body
-type Credentials struct {
-	Password string `json:"password"`
-	Username string `json:"username"`
-}
-
-// Claims struct for jwt token contents
-type Claims struct {
-	Username string `json:"username"`
-	jwt.StandardClaims
-}
-
 // HandleSession entrypoint http request handler for /session
 func HandleSession(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Request.Header.Method()) {
@@ -47,7 +35,7 @@ func HandleSession(ctx *fasthttp.RequestCtx) error {
 	}
 }
 
-// HandleSession entrypoint http request handler for /register
+// HandleRegister entrypoint http request handler for /register
 func HandleRegister(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Request.Header.Method()) {
 	case "POST":
@@ -141,7 +129,7 @@ func handleMethodGet(ctx *fasthttp.RequestCtx) error {
 	return nil
 }
 
-// ValidateSession and check user has atleast one of the roles
+// ValidateSession and check user has atleast one of the roles. returns WebUserObject object iff session is valid
 func ValidateSession(ctx *fasthttp.RequestCtx, roles ...string) (*user.WebUserObject, error) {
 	token, err := verifyToken(ctx)
 	if err != nil {

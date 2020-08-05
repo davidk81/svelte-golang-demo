@@ -61,10 +61,11 @@ func main() {
 func route(ctx *fasthttp.RequestCtx) error {
 	// routes that dont need session
 	// TODO: enable session checking
+	apiPrefix := "/api/v1/"
 	switch string(ctx.Path()) {
-	case "/api/v1/session":
+	case apiPrefix + "session":
 		return session.HandleSession(ctx)
-	case "/api/v1/register":
+	case apiPrefix + "register":
 		return session.HandleRegister(ctx)
 	case "/healthz":
 		return handleHealth(ctx)
@@ -79,13 +80,13 @@ func route(ctx *fasthttp.RequestCtx) error {
 
 	// routes that need session
 	switch string(ctx.Path()) {
-	case "/api/v1/patients":
+	case apiPrefix + "patients":
 		return patient.HandlePatientList(ctx)
-	case "/api/v1/patient":
+	case apiPrefix + "patient":
 		return patient.HandlePatient(ctx)
-	case "/api/v1/patient/note":
+	case apiPrefix + "patient/note":
 		return patient.HandlePatientNote(ctx)
-	case "/api/v1/patient/notes":
+	case apiPrefix + "patient/notes":
 		return patient.HandlePatientNoteList(ctx)
 	default:
 		ctx.NotFound()

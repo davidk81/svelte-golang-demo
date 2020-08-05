@@ -11,14 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// WebUserObject for responding to api request
-type WebUserObject struct {
-	Name     string   `json:"name"`
-	Username string   `json:"username"`
-	Password string   `json:"password"`
-	Roles    []string `json:"roles"`
-}
-
 // HandleUser entrypoint http request handler
 func HandleUser(ctx *fasthttp.RequestCtx) error {
 	switch string(ctx.Request.Header.Method()) {

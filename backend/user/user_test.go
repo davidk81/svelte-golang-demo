@@ -16,3 +16,16 @@ func TestPasswordSalt(t *testing.T) {
 		t.Errorf("different password should fail compare test but did not")
 	}
 }
+
+func TestWebUser(t *testing.T) {
+	user := WebUserObject{
+		Name:     "",
+		Username: "abcd",
+		Password: "12345678",
+		Roles:    []string{"nurse", "admin"},
+	}
+	err := user.Validate(nil)
+	if err == nil {
+		t.Errorf("Expected validation error but did not happen")
+	}
+}
