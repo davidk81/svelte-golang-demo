@@ -82,7 +82,7 @@ func handleMethodGet(ctx *fasthttp.RequestCtx) error {
 	patientID := string(ctx.QueryArgs().Peek("patientid"))
 
 	// return patient info in response
-	p, err := getPatient(patientID, ctx)
+	p, err := getPatient(ctx, patientID)
 	if err != nil {
 		return err
 	}

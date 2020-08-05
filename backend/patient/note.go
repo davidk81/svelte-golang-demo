@@ -39,7 +39,7 @@ func handleMethodNotePost(ctx *fasthttp.RequestCtx) error {
 		return err
 	}
 
-	err = addPatientNote(&note, ctx)
+	err = addPatientNote(ctx, &note)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func handleMethodNoteGetList(ctx *fasthttp.RequestCtx) error {
 	patientID := string(ctx.QueryArgs().Peek("patientid"))
 
 	// return patient info in response
-	p, err := getPatientNotes(patientID, ctx)
+	p, err := getPatientNotes(ctx, patientID)
 	if err != nil {
 		return err
 	}

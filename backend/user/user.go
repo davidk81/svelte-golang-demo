@@ -34,7 +34,7 @@ func HandleUser(ctx *fasthttp.RequestCtx) error {
 
 // Login checks username & password, and returns User data if successful
 func Login(username, password string, ctx *fasthttp.RequestCtx) (*WebUserObject, error) {
-	user, err := getUser(username, ctx)
+	user, err := getUser(ctx, username)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func Login(username, password string, ctx *fasthttp.RequestCtx) (*WebUserObject,
 
 // GetWebUserObject for retrieving an already validated session
 func GetWebUserObject(username string, ctx *fasthttp.RequestCtx) (*WebUserObject, error) {
-	user, err := getUser(username, ctx)
+	user, err := getUser(ctx, username)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func Register(user *WebUserObject, ctx *fasthttp.RequestCtx) error {
 		Roles:  strings.Join(user.Roles, ","),
 		Secret: hashedPassword,
 	}
-	err = createUser(userdao, ctx)
+	err = createUser(ctx, userdao)
 	if err != nil {
 		return err
 	}
