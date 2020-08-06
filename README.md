@@ -7,28 +7,28 @@ A demo app using Svelte as frontend and GoLang as backend. This app provides an 
 - home (login, logout, register)
 - patients list view (accessible by nurses & admin, can add/edit patient)
 	- patient view (list of notes, nurses can add new notes and edit existing)
-- * admin (add/edit users: admin & nurses)
-- * profile (view/modify personal details for logged-in user)
+- ** admin (add/edit users: admin & nurses)
+- ** profile (view/modify personal details for logged-in user)
 
-* not implemented 
+** not implemented 
 
 ## application design
 
 #### frontend
 
-Svelte will be used to compile frontend into static html/css/js pages that can be served over HTTP(S). JWT is used to authenticate client (web browser), as well as validate client session using stateless servers. HTTPS should be employed when deployed in production environment.
+Svelte is used to compile frontend into static html/css/js pages that can be served over HTTP(S). JWT is used to authenticate client (web browser), as well as validate client session using stateless servers.
 
-One advantage of using svelte is its extremely small and fast compiled size. site built with svelt can fun very fast and require little resources, this can be advantageous especially in context of mobile devices. browser compatibility of the target mobile device should be investigated.
+One advantage of using svelte is its extremely small and fast compiled size. Site built with svelt can fun very fast and require little resources, this can be advantageous especially in context of mobile devices. Browser compatibility of the target mobile device should be investigated.
 
-internationalization possibiles will not be address; if needed, it should be possible to achieve localization using plugins such as [svelte-i18n](https://github.com/kaisermann/svelte-i18n).
+Internationalization possibiles will not be address; if needed, it should be possible to achieve localization using plugins such as [svelte-i18n](https://github.com/kaisermann/svelte-i18n).
 
 #### backend
 
-for the sake of keeping this demo simple during development, a single goLang backend service is used to authenticate and serve all api requests. the backend will be used to authenticate client session by providing JWT tokens; it should also be easy to use a 3rd party authentication provider instead. 
+A single goLang backend service is used to authenticate and serve all api requests. The backend will be used to authenticate client session by providing JWT tokens.
 
-if/when the need arises to separate the backend into individual microserves, the backend folder structure is designed to make this process relatively simple. some code refactoring may need to be done, for example, the session service may be updated to call user service endpoint instead of accessing it directly
+if/when the need arises to separate the backend into individual microserves, the backend folder structure is designed to make this process relatively simple. Some code refactoring may need to be done, for example, the session service may be updated to call user service endpoint instead of accessing it directly
 
-data is persisted by backend using postgres sql
+Data is persisted by backend using postgres sql using (SQLBoiler)[https://github.com/volatiletech/sqlboiler]
 
 #### services & data modelling
 
@@ -66,7 +66,7 @@ also refer to [api/README.md](api/README.md) for sample request/response
 		- GET/DELETE (not implemented)
 
 	- dao patient
-		- patientid
+		- patientid (uuid)
 		- name (full name)
 		- location (facility-id, bed-id, room-id, etc)
 		- created-time
